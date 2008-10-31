@@ -278,7 +278,20 @@ class XdebugCachegrindTreeBuilder:
 
 class dotBuilder:
     def getDot(self, tree):
-	self.getDot(node)
+	stack = [tree]
+	stackPos = [0]
+	while len(stack):
+            stack.append(stack[-1].calls[stackPos[-1]])
+            stackPos[-1] += 1
+            stackPos.append(0)
+
+            print stackPos
+
+            # cleanup stack
+            while(len(stack) and len(stack[-1].calls) == stackPos[-1]):
+                del(stack[-1])
+                del(stackPos[-1])
+            
         graph = pydot.Graph(rankdir='TB', ordering='out', graph_type='digraph')
         graph.set_edge_defaults(labelfontsize='12')
         graph.set_node_defaults(shape='box', style='filled')
@@ -289,6 +302,7 @@ class dotBuilder:
 
 if __name__ == '__main__':
     parser = XdebugCachegrindFsaParser(sys.argv[1])
-    tree = XdebugCachegrindTreeBuilder(parser)
-    print tree.getTree()
-    #print dotBuilder().getDot(1)
+    treeBuilder = XdebugCachegrindTreeBuilder(parser)
+    tree = treeBuilder.getTree()
+    print tree
+    #print dotBuilder().getDot(tree)
