@@ -7,7 +7,7 @@ class Entry:
     def __init__(self):
         self.fn = None
         self.fl = None
-        self.selfTime = None
+        self.self_time = None
         self.calls = []
         self.summary = None
 
@@ -17,7 +17,7 @@ class Call:
     def __init__(self):
         self.cfn = None
         self.position = None
-        self.inclusiveTime = None
+        self.inclusive_time = None
 
 
 class Node:
@@ -26,8 +26,8 @@ class Node:
         self.fn = None
         self.fl = None
         self.calls = []
-        self.selfTime = None
-        self.inclusiveTime = None
+        self.self_time = None
+        self.inclusive_time = None
 
 
 class XdebugCachegrindFsaParser:
@@ -219,7 +219,7 @@ class XdebugCachegrindFsaParser:
 
                 # set call's time and position
                 call.position = position
-                call.inclusiveTime = time_taken
+                call.inclusive_time = time_taken
 
             elif state == 7:
                 summary = int(line[9:-1])
@@ -254,9 +254,9 @@ class XdebugCachegrindTreeBuilder:
 
         nodes = []
         stack = []
-        rootNode = Node()
+        root_node = Node()
         stack.append([0, -1])
-        nodes.append(rootNode)
+        nodes.append(root_node)
         i = len(body)
         while i >= 0:
             i -= 1
@@ -279,45 +279,45 @@ class XdebugCachegrindTreeBuilder:
             while len(nodes[stack[j][0]].calls) == stack[j][1]:
                 del(stack[j])
                 j -= 1
-        return rootNode
+        return root_node
 
 
-class dotBuilder:
+class DotBuilder:
     def get_dot(self, tree):
         graph = pydot.Graph(rankdir='TB', ordering='out', graph_type='digraph')
         graph.set_edge_defaults(labelfontsize='12')
         graph.set_node_defaults(shape='box', style='filled')
 
         stack = [tree]
-        stackPos = [-1, 0]
+        stack_pos = [-1, 0]
         
-        self_id = '/'.join(map(str, stackPos[0:-1]));
+        self_id = '/'.join(map(str, stack_pos[0:-1]));
         graph.add_node(pydot.Node(self_id))
         
         while len(stack):
-            stack.append(stack[-1].calls[stackPos[-1]])
-            stackPos[-1] += 1
-            stackPos.append(0)
+            stack.append(stack[-1].calls[stack_pos[-1]])
+            stack_pos[-1] += 1
+            stack_pos.append(0)
             
             if(len(stack) <= 8):
-                parent_id = '/'.join(map(str, stackPos[0:-2]));
-                self_id = '/'.join(map(str, stackPos[0:-1]));
+                parent_id = '/'.join(map(str, stack_pos[0:-2]));
+                self_id = '/'.join(map(str, stack_pos[0:-1]));
                 graph.add_node(pydot.Node(self_id))
                 graph.add_edge(pydot.Edge(parent_id, self_id))
 
-            #print stackPos
+            #print stack_pos
 
             # cleanup stack
-            while(len(stack) and len(stack[-1].calls) == stackPos[-1]):
+            while(len(stack) and len(stack[-1].calls) == stack_pos[-1]):
                 del(stack[-1])
-                del(stackPos[-1])
+                del(stack_pos[-1])
 
         return graph.to_string()
 
 
 if __name__ == '__main__':
     parser = XdebugCachegrindFsaParser(sys.argv[1])
-    treeBuilder = XdebugCachegrindTreeBuilder(parser)
-    tree = treeBuilder.get_tree()
+    tree_builder = XdebugCachegrindTreeBuilder(parser)
+    tree = tree_builder.get_tree()
     #print tree
-    print dotBuilder().get_dot(tree)
+    print DotBuilder().get_dot(tree)
