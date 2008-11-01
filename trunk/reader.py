@@ -319,6 +319,32 @@ class TreeFilter:
                 del(stack_pos[-1])
         
 
+class TreeAggregator:
+    
+    def aggregate(self, tree):
+        aggregated_tree = Tree()
+        aggregated_tree.fl_map = tree.fl_map
+        aggregated_tree.fl_rev = tree.fl_rev
+        aggregated_tree.fn_map = tree.fn_map
+        aggregated_tree.fn_rev = tree.fn_rev
+        
+        stack = [tree.root_node]
+        stack_pos = [-1, 0]
+
+        while len(stack):
+            stack.append(stack[-1].calls[stack_pos[-1]])
+            stack_pos[-1] += 1
+            stack_pos.append(0)
+            
+            if len(stack) == depth:
+                stack[-1].calls = []
+                
+            # cleanup stack
+            while len(stack) and len(stack[-1].calls) == stack_pos[-1]:
+                del(stack[-1])
+                del(stack_pos[-1])
+        
+
 
 class DotBuilder:
 
