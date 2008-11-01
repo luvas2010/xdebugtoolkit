@@ -83,7 +83,7 @@ class XdebugCachegrindFsaParser:
         self.fn_map = {}
         self.fn_inc = 1
 
-    def getHeader(self):
+    def get_header(self):
         self.fh.seek(0)
 
         state = 0;
@@ -127,10 +127,10 @@ class XdebugCachegrindFsaParser:
             'cmd': cmd,
         }
 
-    def getBody(self):
+    def get_body(self):
         body = []
 
-        self.getHeader()
+        self.get_header()
 
         self.fh.seek(0)
 
@@ -243,14 +243,14 @@ class XdebugCachegrindTreeBuilder:
     def __init__(self, parser):
         self.parser = parser
 
-    def getTree(self):
+    def get_tree(self):
         fl_map = self.parser.fl_map
         fl_rev = dict([(v, k) for k, v in fl_map.iteritems()])
 
         fn_map = self.parser.fn_map
         fn_rev = dict([(v, k) for k, v in fn_map.iteritems()])
 
-        body = self.parser.getBody()
+        body = self.parser.get_body()
 
         nodes = []
         stack = []
@@ -283,7 +283,7 @@ class XdebugCachegrindTreeBuilder:
 
 
 class dotBuilder:
-    def getDot(self, tree):
+    def get_dot(self, tree):
         graph = pydot.Graph(rankdir='TB', ordering='out', graph_type='digraph')
         graph.set_edge_defaults(labelfontsize='12')
         graph.set_node_defaults(shape='box', style='filled')
@@ -318,6 +318,6 @@ class dotBuilder:
 if __name__ == '__main__':
     parser = XdebugCachegrindFsaParser(sys.argv[1])
     treeBuilder = XdebugCachegrindTreeBuilder(parser)
-    tree = treeBuilder.getTree()
+    tree = treeBuilder.get_tree()
     #print tree
-    print dotBuilder().getDot(tree)
+    print dotBuilder().get_dot(tree)
