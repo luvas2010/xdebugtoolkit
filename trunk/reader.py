@@ -2,17 +2,17 @@ import sys
 import pydot
 
 
-class Entry:
+class RawEntry:
 
     def __init__(self):
         self.fn = None
         self.fl = None
         self.self_time = None
-        self.calls = []
+        self.subcalls = []
         self.summary = None
 
 
-class Call:
+class RawCall:
 
     def __init__(self):
         self.cfn = None
@@ -20,24 +20,50 @@ class Call:
         self.inclusive_time = None
 
 
-class Node:
+class Call:
 
     def __init__(self):
         self.fn = None
         self.fl = None
-        self.calls = []
+        self.subcalls = []
+        self.call_count = 1
         self.self_time = None
         self.inclusive_time = None
 
 
-class Tree:
-    
+class CallTree:
+
     def __init__(self):
         self.fl_map = None
         self.fl_rev = None
         self.fn_map = None
         self.fn_rev = None
-        self.root_node = None
+        self.root_node = Call()
+        
+    def to_string(self):
+        print self.fn_rev
+        
+        ret = []
+        
+        stack = [self.root_node]
+        stack_pos = [0]
+
+        ret.append('  ' * (len(stack) - 1) + '/') 
+
+        while len(stack):
+            
+            stack.append(stack[-1].subcalls[stack_pos[-1]])
+            stack_pos[-1] += 1
+            stack_pos.append(0)
+            
+            ret.append('  ' * (len(stack) - 1) + str(stack[-1].call_count) + ' x ' + self.fn_rev[stack[-1].fn])
+                
+            # cleanup stack
+            while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
+                del(stack[-1])
+                del(stack_pos[-1])
+        
+        return "\n".join(ret)
 
 
 class XdebugCachegrindFsaParser:
@@ -186,11 +212,11 @@ class XdebugCachegrindFsaParser:
                     self.fl_map[fl] = self.fl_inc
                     self.fl_inc += 1
 
-                # re-init entry
-                entry = Entry()
-                body.append(entry)
+                # re-init raw_entry
+                raw_entry = RawEntry()
+                body.append(raw_entry)
 
-                entry.fl = self.fl_map[fl]
+                raw_entry.fl = self.fl_map[fl]
 
             elif state == 2:
                 fn = line[3:-1]
@@ -198,7 +224,7 @@ class XdebugCachegrindFsaParser:
                     self.fn_map[fn] = self.fn_inc
                     self.fn_inc += 1
 
-                entry.fn = self.fn_map[fn]
+                raw_entry.fn = self.fn_map[fn]
 
             elif state == 3:
                 position, time_taken = map(int, line.split(' '))
@@ -213,11 +239,11 @@ class XdebugCachegrindFsaParser:
                     self.fn_map[cfn] = self.fn_inc
                     self.fn_inc += 1
 
-                # init call
-                call = Call()
-                entry.calls.append(call)
+                # init raw_call
+                raw_call = RawCall()
+                raw_entry.subcalls.append(raw_call)
 
-                call.cfn = self.fn_map[cfn]
+                raw_call.cfn = self.fn_map[cfn]
 
             elif state == 5:
                 calls = line[6:-1]
@@ -227,9 +253,9 @@ class XdebugCachegrindFsaParser:
                 if fn == '{main}':
                     total_calls += time_taken
 
-                # set call's time and position
-                call.position = position
-                call.inclusive_time = time_taken
+                # set raw_call's time and position
+                raw_call.position = position
+                raw_call.inclusive_time = time_taken
 
             elif state == 7:
                 summary = int(line[9:-1])
@@ -264,33 +290,33 @@ class XdebugCachegrindTreeBuilder:
 
         nodes = []
         stack = []
-        root_node = Node()
+        root_node = Call()
         stack.append([0, -1])
         nodes.append(root_node)
         i = len(body)
         while i >= 0:
             i -= 1
-            node = Node()
+            node = Call()
             node.fn = body[i].fn
             node.fl = body[i].fl
             node_id = len(nodes)
             nodes.append(node)
 
-            expected_calls = len(body[i].calls)
+            expected_calls = len(body[i].subcalls)
 
             # add node to it's parent
-            nodes[stack[-1][0]].calls.append(node)
+            nodes[stack[-1][0]].subcalls.append(node)
 
             # fill stack
             stack.append([node_id, expected_calls])
 
             # clean up stack
             j = len(stack) - 1
-            while len(nodes[stack[j][0]].calls) == stack[j][1]:
+            while len(nodes[stack[j][0]].subcalls) == stack[j][1]:
                 del(stack[j])
                 j -= 1
 
-        tree = Tree()
+        tree = CallTree()
         tree.fl_map = fl_map
         tree.fl_rev = fl_rev
         tree.fn_map = fn_map
@@ -299,51 +325,86 @@ class XdebugCachegrindTreeBuilder:
         return tree
 
 
-class TreeFilter:
+class CallTreeFilter:
 
     def filter_depth(self, tree, depth):
         stack = [tree.root_node]
         stack_pos = [-1, 0]
 
         while len(stack):
-            stack.append(stack[-1].calls[stack_pos[-1]])
+            stack.append(stack[-1].subcalls[stack_pos[-1]])
             stack_pos[-1] += 1
             stack_pos.append(0)
             
             if len(stack) == depth:
-                stack[-1].calls = []
+                stack[-1].subcalls = []
                 
             # cleanup stack
-            while len(stack) and len(stack[-1].calls) == stack_pos[-1]:
+            while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
                 del(stack[-1])
                 del(stack_pos[-1])
         
 
-class TreeAggregator:
+class CallTreeAggregator:
     
-    def aggregate(self, tree):
-        aggregated_tree = Tree()
-        aggregated_tree.fl_map = tree.fl_map
-        aggregated_tree.fl_rev = tree.fl_rev
-        aggregated_tree.fn_map = tree.fn_map
-        aggregated_tree.fn_rev = tree.fn_rev
+    def __init__(self):
+        pass
+    
+    def aggregateCallPaths(self, tree):
+        path_map = {}
         
         stack = [tree.root_node]
-        stack_pos = [-1, 0]
+        stack_pos = [0]
+        stack_path = [-1]
 
+        try:
+            call = path_map[tuple(stack_path)]
+        except KeyError:
+            call = Call()
+            call.fl = stack[-1].fl
+            call.fn = stack[-1].fn
+            path_map[tuple(stack_path)] = call
+        
         while len(stack):
-            stack.append(stack[-1].calls[stack_pos[-1]])
+            stack.append(stack[-1].subcalls[stack_pos[-1]])
             stack_pos[-1] += 1
             stack_pos.append(0)
             
-            if len(stack) == depth:
-                stack[-1].calls = []
+            stack_path.append(stack[-1].fn)
+            
+            try:
+                call = path_map[tuple(stack_path)]
+                call.call_count += 1
                 
+                # TODO: add times
+                
+            except KeyError:
+                call = Call()
+                call.fl = stack[-1].fl
+                call.fn = stack[-1].fn
+                
+                # TODO: set times
+                
+                path_map[tuple(stack_path)] = call
+                
+                parent_call = path_map[tuple(stack_path[:-1])]
+                
+                parent_call.subcalls.append(call)
+            
             # cleanup stack
-            while len(stack) and len(stack[-1].calls) == stack_pos[-1]:
+            while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
                 del(stack[-1])
                 del(stack_pos[-1])
+                del(stack_path[-1])
+                
+        new_tree = CallTree()
+        new_tree.fl_map = tree.fl_map
+        new_tree.fl_rev = tree.fl_rev
+        new_tree.fn_map = tree.fn_map
+        new_tree.fn_rev = tree.fn_rev
         
+        new_tree.root_node = path_map[(-1, )]
+        return new_tree
 
 
 class DotBuilder:
@@ -360,19 +421,19 @@ class DotBuilder:
         graph.add_node(pydot.Node(self_id))
         
         while len(stack):
-            stack.append(stack[-1].calls[stack_pos[-1]])
+            stack.append(stack[-1].subcalls[stack_pos[-1]])
             stack_pos[-1] += 1
             stack_pos.append(0)
             
             parent_id = '/'.join(map(str, stack_pos[0:-2]));
             self_id = '/'.join(map(str, stack_pos[0:-1]));
-            graph.add_node(pydot.Node(self_id, label='"'+tree.fn_rev[stack[-1].fn]+'"'))
-            graph.add_edge(pydot.Edge(parent_id, self_id))
+            graph.add_node(pydot.Node(self_id, label='"' + tree.fn_rev[stack[-1].fn] + '"'))
+            graph.add_edge(pydot.Edge(parent_id, self_id, label=str(stack[-1].call_count) + 'x'))
 
             #print stack_pos
 
             # cleanup stack
-            while len(stack) and len(stack[-1].calls) == stack_pos[-1]:
+            while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
                 del(stack[-1])
                 del(stack_pos[-1])
 
@@ -383,7 +444,10 @@ if __name__ == '__main__':
     parser = XdebugCachegrindFsaParser(sys.argv[1])
     tree_builder = XdebugCachegrindTreeBuilder(parser)
     tree = tree_builder.get_tree()
-    tree_filter = TreeFilter()
-    tree_filter.filter_depth(tree, 5)
+    tree_filter = CallTreeFilter()
+    tree_filter.filter_depth(tree, 8)
+    tree_aggregator = CallTreeAggregator()
+    tree = tree_aggregator.aggregateCallPaths(tree)
+    #print tree.to_string()
     #print tree
     print DotBuilder().get_dot(tree)
