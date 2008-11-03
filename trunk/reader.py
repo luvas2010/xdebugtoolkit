@@ -41,8 +41,6 @@ class CallTree:
         self.root_node = Call()
         
     def to_string(self):
-        print self.fn_rev
-        
         ret = []
         
         stack = [self.root_node]
@@ -294,18 +292,23 @@ class XdebugCachegrindTreeBuilder:
         stack.append([0, -1])
         nodes.append(root_node)
         i = len(body)
-        while i >= 0:
+        while i > 0:
             i -= 1
             node = Call()
-            node.fn = body[i].fn
-            node.fl = body[i].fl
+            entry = body[i];
+            node.fn = entry.fn
+            node.fl = entry.fl
             node_id = len(nodes)
             nodes.append(node)
 
-            expected_calls = len(body[i].subcalls)
+            parent_id, parent_expected_calls = stack[-1]
+            parent = nodes[parent_id]
 
             # add node to it's parent
-            nodes[stack[-1][0]].subcalls.append(node)
+            # at the moment they are in the reverse order
+            parent.subcalls.append(node)
+
+            expected_calls = len(entry.subcalls)
 
             # fill stack
             stack.append([node_id, expected_calls])
@@ -313,8 +316,13 @@ class XdebugCachegrindTreeBuilder:
             # clean up stack
             j = len(stack) - 1
             while len(nodes[stack[j][0]].subcalls) == stack[j][1]:
+                # fix reverse order in filled nodes
+                nodes[stack[j][0]].subcalls.reverse()
+        
                 del(stack[j])
                 j -= 1
+
+        root_node.subcalls.reverse()
 
         tree = CallTree()
         tree.fl_map = fl_map
@@ -430,8 +438,6 @@ class DotBuilder:
             graph.add_node(pydot.Node(self_id, label='"' + tree.fn_rev[stack[-1].fn] + '"'))
             graph.add_edge(pydot.Edge(parent_id, self_id, label=str(stack[-1].call_count) + 'x'))
 
-            #print stack_pos
-
             # cleanup stack
             while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
                 del(stack[-1])
@@ -442,12 +448,9 @@ class DotBuilder:
 
 if __name__ == '__main__':
     parser = XdebugCachegrindFsaParser(sys.argv[1])
-    tree_builder = XdebugCachegrindTreeBuilder(parser)
-    tree = tree_builder.get_tree()
-    tree_filter = CallTreeFilter()
-    tree_filter.filter_depth(tree, 8)
+    tree = XdebugCachegrindTreeBuilder(parser).get_tree()
+    CallTreeFilter().filter_depth(tree, 4)
     tree_aggregator = CallTreeAggregator()
-    tree = tree_aggregator.aggregateCallPaths(tree)
+    tree = CallTreeAggregator().aggregateCallPaths(tree)
     #print tree.to_string()
-    #print tree
     print DotBuilder().get_dot(tree)
