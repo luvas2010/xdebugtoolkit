@@ -415,18 +415,54 @@ class CallTreeAggregator:
         return new_tree
 
 
-class DotBuilder:
+# pydot is very slooooooow
+#class DotBuilder:
+#
+#    def get_dot(self, tree):
+#        graph = pydot.Dot(rankdir='TB', ordering='out', graph_type='digraph')
+#        graph.set_edge_defaults(labelfontsize='12')
+#        graph.set_node_defaults(shape='box', style='filled')
+#
+#        stack = [tree.root_node]
+#        stack_pos = [-1, 0]
+#        
+#        self_id = '/'.join(map(str, stack_pos[0:-1]));
+#        graph.add_node(pydot.Node(self_id))
+#        
+#        while len(stack):
+#            stack.append(stack[-1].subcalls[stack_pos[-1]])
+#            stack_pos[-1] += 1
+#            stack_pos.append(0)
+#            
+#            parent_id = '/'.join(map(str, stack_pos[0:-2]));
+#            self_id = '/'.join(map(str, stack_pos[0:-1]));
+#            graph.add_node(pydot.Node(self_id, label='"' + tree.fn_rev[stack[-1].fn] + '"'))
+#            graph.add_edge(pydot.Edge(parent_id, self_id, label=str(stack[-1].call_count) + 'x'))
+#
+#            # cleanup stack
+#            while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
+#                del(stack[-1])
+#                del(stack_pos[-1])
+#
+#        return graph.to_string()
+
+
+class DotBuilder2:
 
     def get_dot(self, tree):
-        graph = pydot.Dot(rankdir='TB', ordering='out', graph_type='digraph')
-        graph.set_edge_defaults(labelfontsize='12')
-        graph.set_node_defaults(shape='box', style='filled')
-
+        graph = []
+        
+        graph.append('digraph G { \n')
+        graph.append('ordering=out; \n')
+        graph.append('rankdir=TB; \n')
+        graph.append('edge [labelfontsize=12]; \n')
+        graph.append('node [shape=box, style=filled]; \n')
+        
         stack = [tree.root_node]
         stack_pos = [-1, 0]
         
         self_id = '/'.join(map(str, stack_pos[0:-1]));
-        graph.add_node(pydot.Node(self_id))
+        graph.append('"%s" \n' % (self_id, ))
         
         while len(stack):
             stack.append(stack[-1].subcalls[stack_pos[-1]])
@@ -435,15 +471,17 @@ class DotBuilder:
             
             parent_id = '/'.join(map(str, stack_pos[0:-2]));
             self_id = '/'.join(map(str, stack_pos[0:-1]));
-            graph.add_node(pydot.Node(self_id, label='"' + tree.fn_rev[stack[-1].fn] + '"'))
-            graph.add_edge(pydot.Edge(parent_id, self_id, label=str(stack[-1].call_count) + 'x'))
+            graph.append('"%s" [label="%s"]; \n' % (self_id, tree.fn_rev[stack[-1].fn]))
+            graph.append('"%s" -> "%s" [label="%s"]; \n' % (parent_id, self_id, str(stack[-1].call_count) + 'x'))
 
             # cleanup stack
             while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
                 del(stack[-1])
                 del(stack_pos[-1])
 
-        return graph.to_string()
+        graph.append("} \n")
+
+        return "".join(graph)
 
 
 if __name__ == '__main__':
@@ -453,4 +491,4 @@ if __name__ == '__main__':
     tree_aggregator = CallTreeAggregator()
     tree = CallTreeAggregator().aggregateCallPaths(tree)
     #print tree.to_string()
-    print DotBuilder().get_dot(tree)
+    print DotBuilder2().get_dot(tree)
