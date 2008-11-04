@@ -1,5 +1,4 @@
 import sys
-import pydot
 
 
 class AutoFilling:
@@ -50,6 +49,39 @@ class Call:
         self.call_count = 1
         self.self_time = None
         self.inclusive_time = None
+
+
+class AggregatedCall:
+    
+    def __init__(self, fl, fn):
+        self.fn = fn
+        self.fl = fl
+        self.subcalls = []
+        self.call_count = 0
+        self.min_self_time = None
+        self.max_self_time = None
+        self.sum_self_time = 0
+        self.min_inclusive_time = None
+        self.max_inclusive_time = None
+        self.sum_inclusive_time = 0
+    
+    def add_call(self, call):
+        assert self.fl == call.fl
+        assert self.fn == call.fn
+        
+        self.call_count += 1
+        if self.min_self_time is None:
+            self.min_self_time = call.self_time
+        else:
+            self.min_self_time = min(self.min_self_time, call.self_time)
+        self.max_self_time = max(self.max_self_time, call.self_time)
+        self.sum_self_time += call.self_time
+        if self.min_inclusive_time is None:
+            self.min_inclusive_time = call.inclusive_time
+        else:
+            self.min_inclusive_time = min(self.min_inclusive_time, call.inclusive_time)
+        self.max_inclusive_time = max(self.max_inclusive_time, call.inclusive_time)
+        self.sum_inclusive_time += call.inclusive_time
 
 
 class CallTree:
@@ -390,15 +422,11 @@ class CallTreeAggregator:
         stack_pos = [0]
         stack_path = [-1]
 
-        try:
-            call = path_map[tuple(stack_path)]
-        except KeyError:
-            call = Call()
-            call.fl = stack[-1].fl
-            call.fn = stack[-1].fn
-            call.self_time = stack[-1].self_time
-            call.inclusive_time = stack[-1].inclusive_time
-            path_map[tuple(stack_path)] = call
+        # create a new aggregated call
+        new_root_node = AggregatedCall(stack[-1].fl, stack[-1].fn)
+        path_map[tuple(stack_path)] = new_root_node
+
+        new_root_node.add_call(stack[-1])
         
         while len(stack):
             stack.append(stack[-1].subcalls[stack_pos[-1]])
@@ -409,25 +437,17 @@ class CallTreeAggregator:
             
             try:
                 call = path_map[tuple(stack_path)]
-                call.call_count += 1
             except KeyError:
-                call = Call()
-                call.fl = stack[-1].fl
-                call.fn = stack[-1].fn
-                
+                # create a new aggregated call 
+                call = AggregatedCall(stack[-1].fl, stack[-1].fn)
                 path_map[tuple(stack_path)] = call
                 
+                # and append it to it's parent
                 parent_call = path_map[tuple(stack_path[:-1])]
-                
                 parent_call.subcalls.append(call)
 
-            if call.self_time is None:
-                call.self_time = 0
-            call.self_time += stack[-1].self_time
-            if call.inclusive_time is None:
-                call.inclusive_time = 0
-            call.inclusive_time += stack[-1].inclusive_time
-            
+            call.add_call(stack[-1])
+
             # cleanup stack
             while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
                 del(stack[-1])
@@ -435,10 +455,9 @@ class CallTreeAggregator:
                 del(stack_path[-1])
                 
         new_tree = CallTree()
+        new_tree.root_node = new_root_node
         new_tree.fl_map = tree.fl_map
         new_tree.fn_map = tree.fn_map
-        
-        new_tree.root_node = path_map[(-1, )]
         return new_tree
 
 
@@ -467,8 +486,16 @@ class DotBuilder:
             
             parent_id = '/'.join(map(str, stack_pos[0:-2]));
             self_id = '/'.join(map(str, stack_pos[0:-1]));
-            graph.append('"%s" [label="%s"]; \n' % (self_id, fn_rev[stack[-1].fn]))
-            graph.append('"%s" -> "%s" [label="%sx\[] = %s&mu;s"]; \n' % (parent_id, self_id, stack[-1].call_count, stack[-1].inclusive_time))
+            if isinstance(stack[-1], Call):
+                graph.append('"%s" [label="%s"]; \n' % (self_id, fn_rev[stack[-1].fn]))
+                graph.append('"%s" -> "%s" [label="%s&mu;s"]; \n' % (parent_id, self_id, stack[-1].inclusive_time))
+            elif isinstance(stack[-1], AggregatedCall) and stack[-1].call_count == 1:
+                graph.append('"%s" [label="%s"]; \n' % (self_id, fn_rev[stack[-1].fn]))
+                graph.append('"%s" -> "%s" [label="%s&mu;s"]; \n' % (parent_id, self_id, stack[-1].sum_inclusive_time))
+            elif isinstance(stack[-1], AggregatedCall):
+                graph.append('"%s" [label="%s"]; \n' % (self_id, fn_rev[stack[-1].fn]))
+                graph.append('"%s" -> "%s" [label="%sx\[%s&mu;s..%s&mu;s] = %s&mu;s"]; \n' % (parent_id, self_id, stack[-1].call_count, stack[-1].min_inclusive_time, stack[-1].max_inclusive_time, stack[-1].sum_inclusive_time))
+                 
 
             # cleanup stack
             while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
