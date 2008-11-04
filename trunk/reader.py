@@ -113,9 +113,7 @@ class XdebugCachegrindFsaParser:
     def __init__(self, filename):
         self.fh = file(filename, 'rU')
         self.fl_map = {}
-        self.fl_inc = 1
         self.fn_map = {}
-        self.fn_inc = 1
 
     def get_header(self):
         self.fh.seek(0)
@@ -162,6 +160,11 @@ class XdebugCachegrindFsaParser:
         }
 
     def get_body(self):
+        fl_inc = 1
+        fl_map = {}
+        fn_inc = 1
+        fn_map = {}
+        
         body = []
 
         self.get_header()
@@ -206,23 +209,27 @@ class XdebugCachegrindFsaParser:
 
             if state == 1:
                 fl = line[3:-1]
-                if fl not in self.fl_map:
-                    self.fl_map[fl] = self.fl_inc
-                    self.fl_inc += 1
 
                 # re-init raw_entry
                 raw_entry = RawEntry()
                 body.append(raw_entry)
 
-                raw_entry.fl = self.fl_map[fl]
+                try:
+                    raw_entry.fl = fl_map[fl]
+                except KeyError:
+                    fl_map[fl] = fl_inc
+                    raw_entry.fl = fl_inc
+                    fl_inc += 1
 
             elif state == 2:
                 fn = line[3:-1]
-                if fn not in self.fn_map:
-                    self.fn_map[fn] = self.fn_inc
-                    self.fn_inc += 1
 
-                raw_entry.fn = self.fn_map[fn]
+                try:
+                    raw_entry.fn = fn_map[fn]
+                except KeyError:
+                    fn_map[fn] = fn_inc
+                    raw_entry.fn = fn_inc
+                    fn_inc += 1
 
             elif state == 3:
                 position, time_taken = map(int, line.split(' '))
@@ -233,15 +240,17 @@ class XdebugCachegrindFsaParser:
 
             elif state == 4:
                 cfn = line[4:-1]
-                if cfn not in self.fn_map:
-                    self.fn_map[cfn] = self.fn_inc
-                    self.fn_inc += 1
 
                 # init raw_call
                 raw_call = RawCall()
                 raw_entry.subcalls.append(raw_call)
 
-                raw_call.cfn = self.fn_map[cfn]
+                try:
+                    raw_call.cfn = fn_map[cfn]
+                except KeyError:
+                    fn_map[cfn] = fn_inc
+                    raw_call.cfn = fn_inc
+                    fn_inc += 1
 
             elif state == 5:
                 calls = line[6:-1]
@@ -264,6 +273,8 @@ class XdebugCachegrindFsaParser:
             elif state == -1:
                 raise Exception(line_no, line, token)
 
+        self.fn_map = fn_map
+        self.fl_map = fl_map
         #print 'summary:    ', summary
         #print 'total_self: ', total_self_before_summary
         #print 'total_calls:', total_calls
