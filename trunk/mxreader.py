@@ -55,18 +55,16 @@ entry_table = (
     ('time', AllIn, number, MatchFail),
     (None, AllIn, newline, MatchFail),
     # subcalls
-    (None, Word, 'cfn=', MatchOk),
-    (None, Skip, -len('cfn=')),
-    ('subcalls', Table, subcall_table, MatchFail, -2),
+    (None, Word + LookAhead, 'cfn=', MatchOk),
+    ('subcalls', Table, subcall_table, MatchFail, -1),
 )
 
 cg_table = (
     # header
     ('header', Table, header_table, MatchFail),
     # body
-    (None, Word, 'fl=', MatchOk),
-    (None, Skip, -len('fl=')),
-    ('entry', Table, entry_table, MatchFail, -2),
+    (None, Word + LookAhead, 'fl=', MatchOk),
+    ('entry', Table, entry_table, MatchFail, -1),
 )
 
 if __name__ == '__main__':
