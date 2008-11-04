@@ -2,6 +2,27 @@ import sys
 import pydot
 
 
+class AutoFilling:
+    def __init__(self):
+        self.data = {}
+    def __repr__(self):
+        return repr(self.data)
+    def __len__(self):
+        return len(self.data)
+    def __getitem__(self, key):
+        if key in self.data:
+            return self.data[key]
+        else:
+            self.data[key] = len(self.data)
+            return self.data[key]
+    def has_key(self, key):
+        return self.data.has_key(key)
+    def __contains__(self, key):
+        return key in self.data
+    def rev(self):
+        return dict([(v, k) for k, v in self.data.iteritems()]) 
+
+
 class RawEntry:
 
     def __init__(self):
@@ -35,18 +56,20 @@ class CallTree:
 
     def __init__(self):
         self.fl_map = None
-        self.fl_rev = None
         self.fn_map = None
-        self.fn_rev = None
         self.root_node = Call()
         
     def to_string(self):
+        fn_rev = self.fn_map.rev()
+        
         ret = []
         
         stack = [self.root_node]
         stack_pos = [0]
 
         ret.append('  ' * (len(stack) - 1) + '/') 
+        ret.append('            (self_time = %s, inclusive_time = %s)' % (stack[-1].self_time, stack[-1].inclusive_time))
+        ret.append('\n');
 
         while len(stack):
             
@@ -54,14 +77,18 @@ class CallTree:
             stack_pos[-1] += 1
             stack_pos.append(0)
             
-            ret.append('  ' * (len(stack) - 1) + str(stack[-1].call_count) + ' x ' + self.fn_rev[stack[-1].fn])
+            ret.append('  ' * (len(stack) - 1))
+            ret.append('%s x ' % stack[-1].call_count)
+            ret.append(fn_rev[stack[-1].fn])
+            ret.append(' (self_time = %s, inclusive_time = %s)' % (stack[-1].self_time, stack[-1].inclusive_time))
+            ret.append('\n');
                 
             # cleanup stack
             while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
                 del(stack[-1])
                 del(stack_pos[-1])
         
-        return "\n".join(ret)
+        return "".join(ret)
 
 
 class XdebugCachegrindFsaParser:
@@ -112,8 +139,8 @@ class XdebugCachegrindFsaParser:
 
     def __init__(self, filename):
         self.fh = file(filename, 'rU')
-        self.fl_map = {}
-        self.fn_map = {}
+        self.fl_map = None
+        self.fn_map = None
 
     def get_header(self):
         self.fh.seek(0)
@@ -160,10 +187,8 @@ class XdebugCachegrindFsaParser:
         }
 
     def get_body(self):
-        fl_inc = 1
-        fl_map = {}
-        fn_inc = 1
-        fn_map = {}
+        fl_map = AutoFilling()
+        fn_map = AutoFilling()
         
         body = []
 
@@ -214,22 +239,12 @@ class XdebugCachegrindFsaParser:
                 raw_entry = RawEntry()
                 body.append(raw_entry)
 
-                try:
-                    raw_entry.fl = fl_map[fl]
-                except KeyError:
-                    fl_map[fl] = fl_inc
-                    raw_entry.fl = fl_inc
-                    fl_inc += 1
+                raw_entry.fl = fl_map[fl]
 
             elif state == 2:
                 fn = line[3:-1]
 
-                try:
-                    raw_entry.fn = fn_map[fn]
-                except KeyError:
-                    fn_map[fn] = fn_inc
-                    raw_entry.fn = fn_inc
-                    fn_inc += 1
+                raw_entry.fn = fn_map[fn]
 
             elif state == 3:
                 position, time_taken = map(int, line.split(' '))
@@ -237,6 +252,8 @@ class XdebugCachegrindFsaParser:
                 if fn == '{main}':
                     total_calls += time_taken
                     total_self_before_summary = total_self
+                    
+                raw_entry.self_time = time_taken
 
             elif state == 4:
                 cfn = line[4:-1]
@@ -245,12 +262,7 @@ class XdebugCachegrindFsaParser:
                 raw_call = RawCall()
                 raw_entry.subcalls.append(raw_call)
 
-                try:
-                    raw_call.cfn = fn_map[cfn]
-                except KeyError:
-                    fn_map[cfn] = fn_inc
-                    raw_call.cfn = fn_inc
-                    fn_inc += 1
+                raw_call.cfn = fn_map[cfn]
 
             elif state == 5:
                 calls = line[6:-1]
@@ -291,12 +303,6 @@ class XdebugCachegrindTreeBuilder:
     def get_tree(self):
         body = self.parser.get_body()
 
-        fl_map = self.parser.fl_map
-        fl_rev = dict([(v, k) for k, v in fl_map.iteritems()])
-
-        fn_map = self.parser.fn_map
-        fn_rev = dict([(v, k) for k, v in fn_map.iteritems()])
-
         nodes = []
         stack = []
         root_node = Call()
@@ -309,8 +315,12 @@ class XdebugCachegrindTreeBuilder:
             entry = body[i];
             node.fn = entry.fn
             node.fl = entry.fl
+            node.inclusive_time = node.self_time = entry.self_time
             node_id = len(nodes)
             nodes.append(node)
+
+            for subcall in entry.subcalls:
+                node.inclusive_time += subcall.inclusive_time
 
             parent_id, parent_expected_calls = stack[-1]
             parent = nodes[parent_id]
@@ -333,13 +343,17 @@ class XdebugCachegrindTreeBuilder:
                 del(stack[j])
                 j -= 1
 
+        # reverse the root_node's subcalls separately
         root_node.subcalls.reverse()
+        
+        # calculate inclusive_time for the root_node separately
+        root_node.inclusive_time = root_node.self_time = 0
+        for subcall in root_node.subcalls:
+            root_node.inclusive_time += subcall.inclusive_time
 
         tree = CallTree()
-        tree.fl_map = fl_map
-        tree.fl_rev = fl_rev
-        tree.fn_map = fn_map
-        tree.fn_rev = fn_rev
+        tree.fl_map = self.parser.fl_map
+        tree.fn_map = self.parser.fn_map
         tree.root_node = root_node
         return tree
 
@@ -382,6 +396,8 @@ class CallTreeAggregator:
             call = Call()
             call.fl = stack[-1].fl
             call.fn = stack[-1].fn
+            call.self_time = stack[-1].self_time
+            call.inclusive_time = stack[-1].inclusive_time
             path_map[tuple(stack_path)] = call
         
         while len(stack):
@@ -394,21 +410,23 @@ class CallTreeAggregator:
             try:
                 call = path_map[tuple(stack_path)]
                 call.call_count += 1
-                
-                # TODO: add times
-                
             except KeyError:
                 call = Call()
                 call.fl = stack[-1].fl
                 call.fn = stack[-1].fn
-                
-                # TODO: set times
                 
                 path_map[tuple(stack_path)] = call
                 
                 parent_call = path_map[tuple(stack_path[:-1])]
                 
                 parent_call.subcalls.append(call)
+
+            if call.self_time is None:
+                call.self_time = 0
+            call.self_time += stack[-1].self_time
+            if call.inclusive_time is None:
+                call.inclusive_time = 0
+            call.inclusive_time += stack[-1].inclusive_time
             
             # cleanup stack
             while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
@@ -418,49 +436,16 @@ class CallTreeAggregator:
                 
         new_tree = CallTree()
         new_tree.fl_map = tree.fl_map
-        new_tree.fl_rev = tree.fl_rev
         new_tree.fn_map = tree.fn_map
-        new_tree.fn_rev = tree.fn_rev
         
         new_tree.root_node = path_map[(-1, )]
         return new_tree
 
 
-# pydot is very slooooooow
-#class DotBuilder:
-#
-#    def get_dot(self, tree):
-#        graph = pydot.Dot(rankdir='TB', ordering='out', graph_type='digraph')
-#        graph.set_edge_defaults(labelfontsize='12')
-#        graph.set_node_defaults(shape='box', style='filled')
-#
-#        stack = [tree.root_node]
-#        stack_pos = [-1, 0]
-#        
-#        self_id = '/'.join(map(str, stack_pos[0:-1]));
-#        graph.add_node(pydot.Node(self_id))
-#        
-#        while len(stack):
-#            stack.append(stack[-1].subcalls[stack_pos[-1]])
-#            stack_pos[-1] += 1
-#            stack_pos.append(0)
-#            
-#            parent_id = '/'.join(map(str, stack_pos[0:-2]));
-#            self_id = '/'.join(map(str, stack_pos[0:-1]));
-#            graph.add_node(pydot.Node(self_id, label='"' + tree.fn_rev[stack[-1].fn] + '"'))
-#            graph.add_edge(pydot.Edge(parent_id, self_id, label=str(stack[-1].call_count) + 'x'))
-#
-#            # cleanup stack
-#            while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
-#                del(stack[-1])
-#                del(stack_pos[-1])
-#
-#        return graph.to_string()
-
-
-class DotBuilder2:
+class DotBuilder:
 
     def get_dot(self, tree):
+        fn_rev = tree.fn_map.rev()
         graph = []
         
         graph.append('digraph G { \n')
@@ -482,8 +467,8 @@ class DotBuilder2:
             
             parent_id = '/'.join(map(str, stack_pos[0:-2]));
             self_id = '/'.join(map(str, stack_pos[0:-1]));
-            graph.append('"%s" [label="%s"]; \n' % (self_id, tree.fn_rev[stack[-1].fn]))
-            graph.append('"%s" -> "%s" [label="%s"]; \n' % (parent_id, self_id, str(stack[-1].call_count) + 'x'))
+            graph.append('"%s" [label="%s"]; \n' % (self_id, fn_rev[stack[-1].fn]))
+            graph.append('"%s" -> "%s" [label="%sx\[] = %s&mu;s"]; \n' % (parent_id, self_id, stack[-1].call_count, stack[-1].inclusive_time))
 
             # cleanup stack
             while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
@@ -498,8 +483,8 @@ class DotBuilder2:
 if __name__ == '__main__':
     parser = XdebugCachegrindFsaParser(sys.argv[1])
     tree = XdebugCachegrindTreeBuilder(parser).get_tree()
-    CallTreeFilter().filter_depth(tree, 4)
+    CallTreeFilter().filter_depth(tree, 6)
     tree_aggregator = CallTreeAggregator()
     tree = CallTreeAggregator().aggregateCallPaths(tree)
     #print tree.to_string()
-    print DotBuilder2().get_dot(tree)
+    print DotBuilder().get_dot(tree)
