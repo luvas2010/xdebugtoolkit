@@ -1,8 +1,8 @@
 digraph G {
 ordering=out;
 rankdir=TB;
-edge [];
-node [shape=box, style=filled];
+edge [labelfontsize=8];
+node [labelfontsize=8, shape=box];
 
 "cg" [label="xdebug cachegrind files"];
 "trace" [label="xdebug trace files"];
