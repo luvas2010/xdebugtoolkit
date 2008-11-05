@@ -1,0 +1,5 @@
+#summary One-sentence summary of this page.
+
+= Symfony profiling example =
+opened with xdot
+[http://xdebugtoolkit.googlecode.com/svn/trunk/example.png]
