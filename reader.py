@@ -446,12 +446,14 @@ class CallTreeFilter:
         stack_pos = [-1, 0]
 
         while len(stack):
-            stack.append(stack[-1].subcalls[stack_pos[-1]])
-            stack_pos[-1] += 1
-            stack_pos.append(0)
-            
-            if stack[-1].inclusive_time < tree.get_total_time() * percent_threshold / 100:
-                stack[-1].subcalls = []
+            parent = stack[-1]
+            call = parent.subcalls[stack_pos[-1]]
+            if call.sum_inclusive_time > tree.get_total_time() * percent_threshold / 100:
+                stack.append(call)
+                stack_pos[-1] += 1
+                stack_pos.append(0)
+            else:
+                parent.subcalls[stack_pos[-1]:stack_pos[-1]+1] = []
                 
             # cleanup stack
             while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
@@ -561,16 +563,16 @@ class DotBuilder:
             parent_id = '/'.join(map(str, stack_pos[0:-2]));
             self_id = '/'.join(map(str, stack_pos[0:-1]));
             if isinstance(stack[-1], Call):
-                graph.append('"%s" [label="%s\\n%s&mu;s"]; \n' % (self_id, fn_rev[stack[-1].fn], stack[-1].self_time))
-                graph.append('"%s" -> "%s" [label="%s&mu;s"]; \n' % (parent_id, self_id, stack[-1].inclusive_time))
+                graph.append('"%s" [label="%s\\n%sms"]; \n' % (self_id, fn_rev[stack[-1].fn], stack[-1].self_time/1000))
+                graph.append('"%s" -> "%s" [label="%sms"]; \n' % (parent_id, self_id, stack[-1].inclusive_time/1000))
             elif isinstance(stack[-1], AggregatedCall) and stack[-1].call_count == 1:
                 color = "#%02x%02x%02x" % node_styler.colorize(stack[-1])
-                graph.append('"%s" [label="%s\\n%s&mu;s" color="%s"]; \n' % (self_id, fn_rev[stack[-1].fn], stack[-1].sum_self_time, color))
-                graph.append('"%s" -> "%s" [label="%s&mu;s"]; \n' % (parent_id, self_id, stack[-1].sum_inclusive_time))
+                graph.append('"%s" [label="%s\\n%sms" color="%s"]; \n' % (self_id, fn_rev[stack[-1].fn], stack[-1].sum_self_time/1000, color))
+                graph.append('"%s" -> "%s" [label="%sms"]; \n' % (parent_id, self_id, stack[-1].sum_inclusive_time/1000))
             elif isinstance(stack[-1], AggregatedCall):
                 color = "#%02x%02x%02x" % node_styler.colorize(stack[-1])
-                graph.append('"%s" [label="%s\\n%sx\[%s&mu;s..%s&mu;s] = %s&mu;s" color="%s"]; \n' % (self_id, fn_rev[stack[-1].fn], stack[-1].call_count, stack[-1].min_self_time, stack[-1].max_self_time, stack[-1].sum_self_time, color))
-                graph.append('"%s" -> "%s" [label="%sx\[%s&mu;s..%s&mu;s] = %s&mu;s"]; \n' % (parent_id, self_id, stack[-1].call_count, stack[-1].min_inclusive_time, stack[-1].max_inclusive_time, stack[-1].sum_inclusive_time))
+                graph.append('"%s" [label="%s\\n%sx\[%sms..%sms] = %sms" color="%s"]; \n' % (self_id, fn_rev[stack[-1].fn], stack[-1].call_count, stack[-1].min_self_time/1000, stack[-1].max_self_time/1000, stack[-1].sum_self_time/1000, color))
+                graph.append('"%s" -> "%s" [label="%sx\[%sms..%sms] = %sms"]; \n' % (parent_id, self_id, stack[-1].call_count, stack[-1].min_inclusive_time/1000, stack[-1].max_inclusive_time/1000, stack[-1].sum_inclusive_time/1000))
                  
 
             # cleanup stack
@@ -588,8 +590,8 @@ if __name__ == '__main__':
     parser = XdebugCachegrindFsaParser(sys.argv[1])
     tree = XdebugCachegrindTreeBuilder(parser).get_tree()
     #CallTreeFilter().filter_depth(tree, 6)
-    CallTreeFilter().filter_inclusive_time(tree, 10)
     tree_aggregator = CallTreeAggregator()
     tree = CallTreeAggregator().aggregateCallPaths(tree)
+    CallTreeFilter().filter_inclusive_time(tree, 1)
     #print tree.to_string()
     print DotBuilder().get_dot(tree, DotNodeStyler)
