@@ -1,6 +1,3 @@
-import sys
-
-
 class AutoFilling:
     def __init__(self):
         self.data = {}
@@ -508,6 +505,7 @@ class DotBuilder:
 
 
 if __name__ == '__main__':
+    import sys
     parser = XdebugCachegrindFsaParser(sys.argv[1])
     tree = XdebugCachegrindTreeBuilder(parser).get_tree()
     CallTreeFilter().filter_depth(tree, 6)
