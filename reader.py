@@ -440,6 +440,23 @@ class CallTreeFilter:
             while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
                 del(stack[-1])
                 del(stack_pos[-1])
+
+    def filter_inclusive_time(self, tree, percent_threshold):
+        stack = [tree.root_node]
+        stack_pos = [-1, 0]
+
+        while len(stack):
+            stack.append(stack[-1].subcalls[stack_pos[-1]])
+            stack_pos[-1] += 1
+            stack_pos.append(0)
+            
+            if stack[-1].inclusive_time < tree.get_total_time() * percent_threshold / 100:
+                stack[-1].subcalls = []
+                
+            # cleanup stack
+            while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
+                del(stack[-1])
+                del(stack_pos[-1])
         
 
 class CallTreeAggregator:
@@ -570,7 +587,8 @@ if __name__ == '__main__':
     import sys
     parser = XdebugCachegrindFsaParser(sys.argv[1])
     tree = XdebugCachegrindTreeBuilder(parser).get_tree()
-    CallTreeFilter().filter_depth(tree, 6)
+    #CallTreeFilter().filter_depth(tree, 6)
+    CallTreeFilter().filter_inclusive_time(tree, 10)
     tree_aggregator = CallTreeAggregator()
     tree = CallTreeAggregator().aggregateCallPaths(tree)
     #print tree.to_string()
