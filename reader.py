@@ -1,3 +1,21 @@
+class DotNodeStyler:
+    
+    def __init__(self, max_self_time, total_time, max_call_count, total_call_count):
+        # cumulative time characteristics
+        self.max_self_time = max_self_time
+        self.total_time = total_time
+        
+        # cumulative call count characteristics
+        self.max_call_count = max_call_count
+        self.total_call_count = total_call_count
+        
+    def colorize(self, call):
+        r = 0.2 + float(call.sum_self_time) / (self.max_self_time) * 0.8
+        g = 0.2 + float(call.call_count) / float(self.max_call_count) * 0.8
+        b = 0.2
+        return (255 * r, 255 * g ,255 * b)
+
+
 class AutoFilling:
     def __init__(self):
         self.data = {}
@@ -86,8 +104,20 @@ class CallTree:
     def __init__(self):
         self.fl_map = None
         self.fn_map = None
+        self.max_self_time = 0
+        self.max_call_count = 0
+        self.total_call_count = 0
         self.root_node = Call()
-        
+    
+    def get_max_self_time(self): return self.max_self_time
+    def get_total_time(self):
+        if isinstance(self.root_node, Call):
+            return self.root_node.inclusive_time
+        else:
+            return self.root_node.sum_inclusive_time
+    def get_max_call_count(self): return self.max_call_count
+    def get_total_call_count(self): return self.total_call_count
+    
     def to_string(self):
         fn_rev = self.fn_map.rev()
         
@@ -323,9 +353,12 @@ class XdebugCachegrindFsaParser:
 
 
 class XdebugCachegrindTreeBuilder:
+    """A tree builder class.
+    
+    It accepts a parser, uses it to fetch cachegrind's raw structure and
+    composes a tree from it.
     """
-    A tree builder class.
-    """
+    
     def __init__(self, parser):
         self.parser = parser
 
@@ -383,6 +416,8 @@ class XdebugCachegrindTreeBuilder:
         tree = CallTree()
         tree.fl_map = self.parser.fl_map
         tree.fn_map = self.parser.fn_map
+        tree.total_call_count = len(body)
+        tree.max_call_count = 1
         tree.root_node = root_node
         return tree
 
@@ -413,6 +448,8 @@ class CallTreeAggregator:
         pass
     
     def aggregateCallPaths(self, tree):
+        max_self_time = 0
+        max_call_count = 0
         path_map = {}
         
         stack = [tree.root_node]
@@ -445,6 +482,10 @@ class CallTreeAggregator:
 
             call.add_call(stack[-1])
 
+            # update max_subcall_count and max_self_time
+            max_call_count = max(max_call_count, call.call_count)
+            max_self_time = max(max_self_time, call.sum_self_time)
+
             # cleanup stack
             while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
                 del(stack[-1])
@@ -454,19 +495,38 @@ class CallTreeAggregator:
         new_tree = CallTree()
         new_tree.root_node = new_root_node
         new_tree.fl_map = tree.fl_map
+        new_tree.max_self_time = max_self_time
+        new_tree.total_call_count = tree.total_call_count
+        new_tree.max_call_count = max_call_count
         new_tree.fn_map = tree.fn_map
         return new_tree
 
 
 class DotBuilder:
 
-    def get_dot(self, tree):
+    def get_dot(self, tree, node_styler_class):
+        node_styler = node_styler_class(tree.get_max_self_time(),
+            tree.get_total_time(), tree.get_max_call_count(),
+            tree.get_total_call_count())
         fn_rev = tree.fn_map.rev()
+        for i in fn_rev:
+            if fn_rev[i].startswith('php::'):
+                fn_rev[i] = fn_rev[i][5:]
+            if fn_rev[i].startswith('require::'):
+                fn_rev[i] = fn_rev[i][9:]
+            if fn_rev[i].startswith('require_once::'):
+                fn_rev[i] = fn_rev[i][14:]
+            if fn_rev[i].startswith('include::'):
+                fn_rev[i] = fn_rev[i][9:]
+            if fn_rev[i].startswith('include_once::'):
+                fn_rev[i] = fn_rev[i][14:]
+            if len(fn_rev[i]) > 30:
+                fn_rev[i] = fn_rev[i][0:12] + '...' + fn_rev[i][-15:]
         graph = []
         
         graph.append('digraph G { \n')
-        graph.append('ordering=out; \n')
-        graph.append('rankdir=TB; \n')
+        #graph.append('ordering=out; \n') # dot fails if rankdir=LR and ordering=out
+        graph.append('rankdir=LR; \n')
         graph.append('edge [labelfontsize=12]; \n')
         graph.append('node [shape=box, style=filled]; \n')
         
@@ -484,13 +544,15 @@ class DotBuilder:
             parent_id = '/'.join(map(str, stack_pos[0:-2]));
             self_id = '/'.join(map(str, stack_pos[0:-1]));
             if isinstance(stack[-1], Call):
-                graph.append('"%s" [label="%s"]; \n' % (self_id, fn_rev[stack[-1].fn]))
+                graph.append('"%s" [label="%s\\n%s&mu;s"]; \n' % (self_id, fn_rev[stack[-1].fn], stack[-1].self_time))
                 graph.append('"%s" -> "%s" [label="%s&mu;s"]; \n' % (parent_id, self_id, stack[-1].inclusive_time))
             elif isinstance(stack[-1], AggregatedCall) and stack[-1].call_count == 1:
-                graph.append('"%s" [label="%s"]; \n' % (self_id, fn_rev[stack[-1].fn]))
+                color = "#%02x%02x%02x" % node_styler.colorize(stack[-1])
+                graph.append('"%s" [label="%s\\n%s&mu;s" color="%s"]; \n' % (self_id, fn_rev[stack[-1].fn], stack[-1].sum_self_time, color))
                 graph.append('"%s" -> "%s" [label="%s&mu;s"]; \n' % (parent_id, self_id, stack[-1].sum_inclusive_time))
             elif isinstance(stack[-1], AggregatedCall):
-                graph.append('"%s" [label="%s"]; \n' % (self_id, fn_rev[stack[-1].fn]))
+                color = "#%02x%02x%02x" % node_styler.colorize(stack[-1])
+                graph.append('"%s" [label="%s\\n%sx\[%s&mu;s..%s&mu;s] = %s&mu;s" color="%s"]; \n' % (self_id, fn_rev[stack[-1].fn], stack[-1].call_count, stack[-1].min_self_time, stack[-1].max_self_time, stack[-1].sum_self_time, color))
                 graph.append('"%s" -> "%s" [label="%sx\[%s&mu;s..%s&mu;s] = %s&mu;s"]; \n' % (parent_id, self_id, stack[-1].call_count, stack[-1].min_inclusive_time, stack[-1].max_inclusive_time, stack[-1].sum_inclusive_time))
                  
 
@@ -512,4 +574,4 @@ if __name__ == '__main__':
     tree_aggregator = CallTreeAggregator()
     tree = CallTreeAggregator().aggregateCallPaths(tree)
     #print tree.to_string()
-    print DotBuilder().get_dot(tree)
+    print DotBuilder().get_dot(tree, DotNodeStyler)
