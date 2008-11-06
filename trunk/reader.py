@@ -10,9 +10,9 @@ class DotNodeStyler:
         self.total_call_count = total_call_count
         
     def colorize(self, call):
-        r = 0.2 + float(call.sum_self_time) / (self.max_self_time) * 0.8
-        g = 0.2 + float(call.call_count) / float(self.max_call_count) * 0.8
-        b = 0.2
+        r = 0.8
+        g = 0.8 - float(call.sum_self_time) / (self.max_self_time) * 0.8
+        b = 0.8 - float(call.call_count) / float(self.max_call_count) * 0.8
         return (255 * r, 255 * g ,255 * b)
 
 
@@ -545,7 +545,7 @@ class DotBuilder:
         
         graph.append('digraph G { \n')
         #graph.append('ordering=out; \n') # dot fails if rankdir=LR and ordering=out
-        graph.append('rankdir=LR; \n')
+        graph.append('rankdir=TB; \n')
         graph.append('edge [labelfontsize=12]; \n')
         graph.append('node [shape=box, style=filled]; \n')
         
@@ -592,6 +592,6 @@ if __name__ == '__main__':
     #CallTreeFilter().filter_depth(tree, 6)
     tree_aggregator = CallTreeAggregator()
     tree = CallTreeAggregator().aggregateCallPaths(tree)
-    CallTreeFilter().filter_inclusive_time(tree, 1)
+    CallTreeFilter().filter_inclusive_time(tree, 0.15)
     #print tree.to_string()
     print DotBuilder().get_dot(tree, DotNodeStyler)
