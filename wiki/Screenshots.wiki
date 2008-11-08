@@ -1,12 +1,4 @@
 = Symfony profiling example =
 Opened with xdot (under Ubuntu):
 
-[http://xdebugtoolkit.googlecode.com/svn/trunk/small_screenshot.png]
-
-Opened with xdot (under Ubuntu):
-
-[http://xdebugtoolkit.googlecode.com/svn/trunk/large_screenshot.png]
-
-Opened with xdot (under Windows):
-
-[http://xdebugtoolkit.googlecode.com/svn/trunk/example.png]
+[http://xdebugtoolkit.googlecode.com/svn/wiki/small_screenshot.png]
