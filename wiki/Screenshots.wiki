@@ -1,4 +1,4 @@
-= Symfony profiling example =
+= CodeIgniter profiling example =
 Opened with xdot (under Ubuntu):
 
 [http://xdebugtoolkit.googlecode.com/svn/wiki/small_screenshot.png]
