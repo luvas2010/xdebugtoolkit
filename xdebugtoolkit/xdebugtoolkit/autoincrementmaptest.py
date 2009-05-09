@@ -19,10 +19,10 @@ class Test(unittest.TestCase):
 
     def testStoreArrayAccess(self):
         map = AutoIncrementMap()
-        id = map['a']
-        self.assertEquals(id, 0)
-        id = map['b']
-        self.assertEquals(id, 1)
+        id_a = map['a']
+        id_b = map['b']
+        self.assertEquals(id_a, 0)
+        self.assertEquals(id_b, 1)
 
     def testZeroLen(self):
         map = AutoIncrementMap()
@@ -66,6 +66,13 @@ class Test(unittest.TestCase):
         map.store('b')
         self.assertEquals(map.store('a'), 0)
         self.assertEquals(map.store('b'), 1)
+
+    def testGetArrayAccess(self):
+        map = AutoIncrementMap()
+        map.store('a')
+        map.store('b')
+        self.assertEquals(map['a'], 0)
+        self.assertEquals(map['b'], 1)
         
     def testGetById(self):
         map = AutoIncrementMap()
