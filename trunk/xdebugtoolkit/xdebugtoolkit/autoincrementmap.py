@@ -46,3 +46,5 @@ class AutoIncrementMap(object):
             self[key]
     def get_by_id(self, id):
         return self.rev[id]
+    def __iter__(self):
+        return iter(self.rev)

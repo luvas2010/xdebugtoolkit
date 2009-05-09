@@ -81,6 +81,23 @@ class Test(unittest.TestCase):
         self.assertEquals(map1['b1'], 1)
         self.assertEquals(map1['a1'], 0)
 
+    def testIterate(self):
+        map = AutoIncrementMap()
+        map['a']
+        map['b']
+        test = []
+        for i in map:
+            test.append(i)
+        self.assertEquals(test, ['a', 'b'])
+    
+    def testComprehension(self):
+        map = AutoIncrementMap()
+        map['a']
+        map['b']
+        test = [i for i in map]
+        self.assertEquals(test, ['a', 'b'])
+        
+
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testLen']
     unittest.main()
