@@ -7,8 +7,8 @@ Created on May 9, 2009
 class AutoIncrementMap(object):
     '''
     AutoIncrementMap is a structure for storing some data records
-    with auto-increment ids. It handles fast mapping in both
-    directions. Auto-increments works when you try
+    with auto-increment ids. It handles fast ( O(1) complexity )
+    mapping in both directions. Auto-increments works when you try
     to fetch an id for a record which hasn't been put into the
     structure yet, and will assign a new id to that record. If you
     then try to fetch the id once again, you'll just get the same
