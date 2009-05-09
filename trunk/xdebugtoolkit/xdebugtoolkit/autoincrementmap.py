@@ -6,7 +6,20 @@ Created on May 9, 2009
 
 class AutoIncrementMap(object):
     '''
-    classdocs
+    AutoIncrementMap is a structure for storing some data records
+    with auto-increment ids. It handles fast mapping in both
+    directions. Auto-increments works when you try
+    to fetch an id for a record which hasn't been put into the
+    structure yet, and will assign a new id to that record. If you
+    then try to fetch the id once again, you'll just get the same
+    id one more time.
+    
+    NB: an id assigned to the first records is 0
+    
+    The get_by_id() method is used for reverse mapping: id -> record.
+    Auto-increment is naturally doesn't work in this case.
+    
+    Please check the package's unit test for examples. 
     '''
 
 
