@@ -31,12 +31,7 @@ class AutoIncrementMap(object):
     def __len__(self):
         return len(self.data)
     def __getitem__(self, key):
-        if key in self.data:
-            return self.data[key]
-        else:
-            self.data[key] = len(self.data)
-            self.rev.append(key)
-            return self.data[key]
+        return self.store(key)
     def has_key(self, key):
         return self.data.has_key(key)
     def __contains__(self, key):
@@ -48,3 +43,10 @@ class AutoIncrementMap(object):
         return self.rev[id]
     def __iter__(self):
         return iter(self.rev)
+    def store(self, key):
+        if key in self.data:
+            return self.data[key]
+        else:
+            self.data[key] = len(self.data)
+            self.rev.append(key)
+            return self.data[key]
