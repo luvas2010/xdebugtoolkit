@@ -59,6 +59,10 @@ class Test(unittest.TestCase):
         self.assertEquals(map.get_by_id(0), 'a')
         self.assertEquals(map.get_by_id(1), 'b')
         
+    def testGetByIdFails(self):
+        map = AutoIncrementMap()
+        self.assertRaises(IndexError, map.get_by_id, 0)
+        
     def testMerge(self):
         map1 = AutoIncrementMap()
         map1['a1']
