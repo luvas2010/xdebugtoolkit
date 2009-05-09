@@ -9,31 +9,46 @@ from autoincrementmap import AutoIncrementMap
 class Test(unittest.TestCase):
 
 
+    def testStore(self):
+        map = AutoIncrementMap()
+        id = map.store('a')
+        self.assertEquals(id, 0)
+        id = map.store('b')
+        self.assertEquals(id, 1)
+
+
+    def testStoreArrayAccess(self):
+        map = AutoIncrementMap()
+        id = map['a']
+        self.assertEquals(id, 0)
+        id = map['b']
+        self.assertEquals(id, 1)
+
     def testZeroLen(self):
         map = AutoIncrementMap()
         self.assertEquals(len(map), 0)
         
     def testIncrementingLen(self):    
         map = AutoIncrementMap()
-        map['a']
+        map.store('a')
         self.assertEquals(len(map), 1)
-        map['b']
+        map.store('b')
         self.assertEquals(len(map), 2)
         
     def testNonIncrementingLen(self):    
         map = AutoIncrementMap()
-        map['a']
-        map['b']
+        map.store('a')
+        map.store('b')
         self.assertEquals(len(map), 2)
-        map['a']
-        map['b']
-        self.assertEquals(len(map), 2)
-        
+        map.store('a')
+        map.store('b')
+        self.assertEquals(len(map), 2)        
+    
     def testContains(self):
         map = AutoIncrementMap()
         self.assertFalse('a' in map)
         self.assertFalse('b' in map)
-        map['a']
+        map.store('a')
         self.assertTrue('a' in map)
         self.assertFalse('b' in map)
 
@@ -41,21 +56,21 @@ class Test(unittest.TestCase):
         map = AutoIncrementMap()
         self.assertFalse(map.has_key('a'))
         self.assertFalse(map.has_key('b'))
-        map['a']
+        map.store('a')
         self.assertTrue(map.has_key('a'))
         self.assertFalse(map.has_key('b'))
         
     def testGet(self):
         map = AutoIncrementMap()
-        map['a']
-        map['b']
-        self.assertEquals(map['a'], 0)
-        self.assertEquals(map['b'], 1)
+        map.store('a')
+        map.store('b')
+        self.assertEquals(map.store('a'), 0)
+        self.assertEquals(map.store('b'), 1)
         
     def testGetById(self):
         map = AutoIncrementMap()
-        map['a']
-        map['b']
+        map.store('a')
+        map.store('b')
         self.assertEquals(map.get_by_id(0), 'a')
         self.assertEquals(map.get_by_id(1), 'b')
         
@@ -65,12 +80,12 @@ class Test(unittest.TestCase):
         
     def testMerge(self):
         map1 = AutoIncrementMap()
-        map1['a1']
-        map1['b1']
+        map1.store('a1')
+        map1.store('b1')
         map2 = AutoIncrementMap()
-        map1['b1']
-        map2['a2']
-        map2['b2']
+        map2.store('b1')
+        map2.store('a2')
+        map2.store('b2')
         map1.merge(map2)
         
         self.assertEquals(len(map1), 4)
@@ -80,15 +95,15 @@ class Test(unittest.TestCase):
         self.assertTrue('a2' in map1)
         self.assertTrue('b2' in map1)
 
-        self.assertEquals(map1['b2'], 3)
-        self.assertEquals(map1['a2'], 2)
-        self.assertEquals(map1['b1'], 1)
-        self.assertEquals(map1['a1'], 0)
+        self.assertEquals(map1.store('b2'), 3)
+        self.assertEquals(map1.store('a2'), 2)
+        self.assertEquals(map1.store('b1'), 1)
+        self.assertEquals(map1.store('a1'), 0)
 
     def testIterate(self):
         map = AutoIncrementMap()
-        map['a']
-        map['b']
+        map.store('a')
+        map.store('b')
         test = []
         for i in map:
             test.append(i)
@@ -96,8 +111,8 @@ class Test(unittest.TestCase):
     
     def testComprehension(self):
         map = AutoIncrementMap()
-        map['a']
-        map['b']
+        map.store('a')
+        map.store('b')
         test = [i for i in map]
         self.assertEquals(test, ['a', 'b'])
         
