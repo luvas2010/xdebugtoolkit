@@ -1,3 +1,5 @@
+import cgparser
+
 class AggregatedCall:
     
     def __init__(self, fl, fn):
@@ -38,12 +40,24 @@ class AggregatedCall:
         self.max_inclusive_time = max(self.max_inclusive_time, max_inclusive_time)
         self.sum_inclusive_time += sum_inclusive_time
 
+    def __str__(self):
+        return str({
+            'fn': self.fn,
+            'fl': self.fl,
+            'subcalls': self.subcalls,
+            'call_count': self.call_count,
+            'min_self_time': self.min_self_time,
+            'max_self_time': self.max_self_time,
+            'sum_self_time': self.sum_self_time,
+            'min_inclusive_time': self.min_inclusive_time,
+            'max_inclusive_time': self.max_inclusive_time,
+            'sum_inclusive_time': self.sum_inclusive_time,
+        })
+
 
 class CallTree:
 
     def __init__(self):
-        self.fl_map = None
-        self.fn_map = None
         self.max_self_time = 0
         self.max_call_count = 0
         self.total_call_count = 0
@@ -54,37 +68,27 @@ class CallTree:
     def get_max_call_count(self): return self.max_call_count
     def get_total_call_count(self): return self.total_call_count
     
-    def to_string(self):
-        fn_rev = self.fn_map.rev()
+    def merge(self, tree):
+        # update tree statistics
+        self.max_call_count = max(self.max_call_count, tree.max_call_count)
+        self.max_self_time = max(self.max_self_time, tree.max_self_time)
+        self.total_call_count += tree.total_call_count
         
-        ret = []
+        # merge foreign root node to self root node
+        self.root_node.merge(tree.root_node)
         
-        stack = [self.root_node]
-        stack_pos = [0]
-
-        ret.append('  ' * (len(stack) - 1) + '/') 
-        ret.append('            (self_time = %s, inclusive_time = %s)' % (stack[-1].self_time, stack[-1].inclusive_time))
-        ret.append('\n');
-
-        while len(stack):
-            
-            stack.append(stack[-1].subcalls[stack_pos[-1]])
-            stack_pos[-1] += 1
-            stack_pos.append(0)
-            
-            ret.append('  ' * (len(stack) - 1))
-            ret.append('%s x ' % stack[-1].call_count)
-            ret.append(fn_rev[stack[-1].fn])
-            ret.append(' (self_time = %s, inclusive_time = %s)' % (stack[-1].self_time, stack[-1].inclusive_time))
-            ret.append('\n');
-                
-            # cleanup stack
-            while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
-                del(stack[-1])
-                del(stack_pos[-1])
-        
-        return "".join(ret)
-
+        # merge foreigh root node's subcalls
+        self.root_node.subcalls += tree.root_node.subcalls
+    
+    def filter_inclusive_time(self, threshold):
+        CallTreeFilter().filter_inclusive_time(self, threshold)
+    
+    def __str__(self):
+        return str({
+            'max_self_time': self.max_self_time,
+            'max_call_count': self.max_call_count,
+            'total_call_count': self.total_call_count,
+        })
 
 class XdebugCachegrindTreeBuilder:
     """A tree builder class.
@@ -97,8 +101,10 @@ class XdebugCachegrindTreeBuilder:
         self.parser = parser
 
     def get_tree(self):
-        body = self.parser.get_body()
+        body_obj = self.parser.get_body()
+        body = body_obj.get_body()
 
+        max_self_time = 0
         nodes = []
         stack = []
         root_node = AggregatedCall(None, None)
@@ -109,7 +115,10 @@ class XdebugCachegrindTreeBuilder:
             i -= 1
             entry = body[i];
 
-            inclusive_time = entry.self_time + sum([x.inclusive_time for x in entry.subcalls])
+            inclusive_time = entry.self_time + sum([x.inclusive_time for x in entry.get_subcalls()])
+            
+            # update tree-wide max_self_time
+            max_self_time = max(max_self_time, entry.self_time)
 
             node = AggregatedCall(entry.fl, entry.fn);
             node.add_call(entry.fl, entry.fn, entry.self_time, inclusive_time)
@@ -124,7 +133,7 @@ class XdebugCachegrindTreeBuilder:
             # at the moment they are in the reverse order
             parent.subcalls.append(node)
 
-            expected_calls = len(entry.subcalls)
+            expected_calls = len(entry.get_subcalls())
 
             # fill stack
             stack.append([node_id, expected_calls])
@@ -146,10 +155,9 @@ class XdebugCachegrindTreeBuilder:
         root_node.add_call(None, None, 0, inclusive_time)
 
         tree = CallTree()
-        tree.fl_map = self.parser.fl_map
-        tree.fn_map = self.parser.fn_map
         tree.total_call_count = len(body)
         tree.max_call_count = 1
+        tree.max_self_time = max_self_time
         tree.root_node = root_node
         return tree
 
@@ -245,21 +253,7 @@ class CallTreeAggregator:
                 
         new_tree = CallTree()
         new_tree.root_node = new_root_node
-        new_tree.fl_map = tree.fl_map
         new_tree.max_self_time = max_self_time
         new_tree.total_call_count = tree.total_call_count
         new_tree.max_call_count = max_call_count
-        new_tree.fn_map = tree.fn_map
         return new_tree
-
-
-if __name__ == '__main__':
-    import sys
-    parser = XdebugCachegrindFsaParser(sys.argv[1])
-    tree = XdebugCachegrindTreeBuilder(parser).get_tree()
-    #CallTreeFilter().filter_depth(tree, 6)
-    tree_aggregator = CallTreeAggregator()
-    tree = CallTreeAggregator().aggregate_call_paths(tree)
-    CallTreeFilter().filter_inclusive_time(tree, 0.15)
-    #print tree.to_string()
-    print DotBuilder().get_dot(tree, DotNodeStyler)
