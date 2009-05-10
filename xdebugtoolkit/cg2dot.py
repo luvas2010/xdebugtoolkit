@@ -1,9 +1,9 @@
 if __name__ == '__main__':
     import sys
-    from xdebugtoolkit.cgparser import XdebugCachegrindFsaParser
-    from xdebugtoolkit.reader import CallTree, CallTreeAggregator, CallTreeFilter, XdebugCachegrindTreeBuilder
-    from xdebugtoolkit.dot import DotBuilder
-    from xdebugtoolkit.stylers.default import DotNodeStyler
+    from cgparser import XdebugCachegrindFsaParser
+    from reader import CallTree, CallTreeAggregator, CallTreeFilter, XdebugCachegrindTreeBuilder
+    from dot import DotBuilder
+    from stylers.default import DotNodeStyler
     
     from optparse import OptionParser
 
