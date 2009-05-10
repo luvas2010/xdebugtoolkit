@@ -7,7 +7,7 @@ if __name__ == '__main__':
     
     from optparse import OptionParser
 
-    parser = OptionParser()
+    parser = OptionParser(usage='%prog file [file ...]')
     parser.add_option('-t', '--threshold', dest='threshold',
                       action="store", type="float", default=1,
                       help='remove fast tails that took less then this percent of total execution time. Default is %default%.')
