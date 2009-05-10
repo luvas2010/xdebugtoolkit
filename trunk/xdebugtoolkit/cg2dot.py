@@ -1,7 +1,7 @@
 if __name__ == '__main__':
     import sys
     from cgparser import XdebugCachegrindFsaParser
-    from reader import CallTree, CallTreeAggregator, CallTreeFilter, XdebugCachegrindTreeBuilder
+    from reader import CallTree, CallTreeAggregator, XdebugCachegrindTreeBuilder
     from dot import DotBuilder
     from stylers.default import DotNodeStyler
     
