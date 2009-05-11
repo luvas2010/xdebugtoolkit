@@ -280,10 +280,11 @@ class XdebugCachegrindFsaParser:
 
         return RawHeader('0.9.6', cmd, '1', 'Time')
 
-    # TODO: optimization using FileName and FunctionName hash
-    # cache
     def get_body(self):
         body = []
+
+        fl_cache = {}
+        fn_cache = {}
 
         header = self.get_header()
 
@@ -332,12 +333,18 @@ class XdebugCachegrindFsaParser:
                 raw_entry = RawEntry()
                 body.append(raw_entry)
 
-                raw_entry.fl = FileName(fl)
+                try:
+                    raw_entry.fl = fl_cache[fl]
+                except KeyError:
+                    raw_entry.fl = fl_cache[fl] = FileName(fl)
 
             elif state == 2:
                 fn = line[3:-1]
 
-                raw_entry.fn = FunctionName(fn)
+                try:
+                    raw_entry.fn = fn_cache[fn]
+                except KeyError:
+                    raw_entry.fn = fn_cache[fn] = FunctionName(fn)
 
             elif state == 3:
                 position, time_taken = map(int, line.split(' '))
@@ -356,7 +363,10 @@ class XdebugCachegrindFsaParser:
                 raw_call = RawCall()
                 raw_entry.add_subcall(raw_call)
 
-                raw_call.cfn = FunctionName(cfn)
+                try:
+                    raw_call.cfn = fn_cache[cfn]
+                except KeyError:
+                    raw_call.cfn = fn_cache[cfn] = FunctionName(cfn)
 
             elif state == 5:
                 calls = line[6:-1]
