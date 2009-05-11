@@ -19,8 +19,8 @@ if __name__ == '__main__':
     tree_aggregator = CallTreeAggregator()
 
     for file in args:
-        parser = XdebugCachegrindFsaParser(file)
-        tree = XdebugCachegrindTreeBuilder(parser).get_tree()
+        xdebug_parser = XdebugCachegrindFsaParser(file)
+        tree = XdebugCachegrindTreeBuilder(xdebug_parser).get_tree()
         merged_tree.merge(tree)
         merged_tree = tree_aggregator.aggregate_call_paths(merged_tree)
 
