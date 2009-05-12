@@ -1,6 +1,10 @@
 import cgparser
 
-class AggregatedCall:
+class AggregatedCall(object):
+    
+    __slots__ = ('fn', 'fl', 'subcalls', 'call_count',
+                 'min_self_time', 'max_self_time', 'sum_self_time',
+                 'min_inclusive_time', 'max_inclusive_time', 'sum_inclusive_time')
     
     def __init__(self, fl, fn):
         self.fn = fn
