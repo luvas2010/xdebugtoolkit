@@ -7,6 +7,8 @@ if __name__ == '__main__':
     from dot import DotBuilder
     from stylers.default import DotNodeStyler
     
+    import memusage
+    
     from optparse import OptionParser
 
     parser = OptionParser(usage='%prog file [file ...]')
@@ -23,6 +25,7 @@ if __name__ == '__main__':
     for file in args:
         xdebug_parser = XdebugCachegrindFsaParser(file)
         tree = XdebugCachegrindTreeBuilder(xdebug_parser).get_tree()
+        print memusage.memory()
         merged_tree.merge(tree)
         merged_tree = tree_aggregator.aggregate_call_paths(merged_tree)
 

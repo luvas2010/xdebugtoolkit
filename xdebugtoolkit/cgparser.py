@@ -108,7 +108,7 @@ class RawHeader:
         return res
         
 
-class RawEntry:
+class RawEntry(object):
     """
     The RawEntry class is used for mapping the following entries'
     data from callgrind files:
@@ -118,6 +118,8 @@ class RawEntry:
     - self time
     - collection of subcalls those are represented by RawCall entries
     """
+
+    __slots__ = ('fn', 'fl', 'self_time', '_subcalls', 'summary', 'position')
 
     def __init__(self):
         self.fn = None
@@ -148,7 +150,7 @@ class RawEntry:
         return res
  
 
-class RawCall:
+class RawCall(object):
     """
     The RawCall class is used for mapping subcalls in callgrind files
     and handles those data:
@@ -157,6 +159,8 @@ class RawCall:
     - call's position
     - call's inclusive time
     """
+
+    __slots__ = ('cfn', 'position', 'inclusive_time')
 
     def __init__(self):
         self.cfn = None
