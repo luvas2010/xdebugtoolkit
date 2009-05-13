@@ -108,9 +108,6 @@ class XdebugCachegrindTreeBuilder:
         body_obj = self.parser.get_body()
         body = body_obj.get_body()
 
-        from datetime import datetime
-        start = datetime.now()
-
         max_self_time = 0
         nodes = []
         stack = []
@@ -162,8 +159,6 @@ class XdebugCachegrindTreeBuilder:
         tree.max_call_count = 1
         tree.max_self_time = max_self_time
         tree.root_node = root_node
-        end = datetime.now()
-        print end - start
         return tree
 
 
