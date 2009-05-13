@@ -111,9 +111,12 @@ class XdebugCachegrindTreeBuilder:
         max_self_time = 0
         stack = []
         stack_pos = []
+        tl_count = self.count_tl_calls(body)
         root_node = AggregatedCall(None, None)
+        root_node.subcalls = [None] * tl_count
         stack.append(root_node)
-        stack_pos.append(-2)      
+        stack_pos.append(tl_count - 1)
+        
         for entry in reversed(body):            
             # update tree-wide max_self_time
             max_self_time = max(max_self_time, entry.self_time)
@@ -128,24 +131,18 @@ class XdebugCachegrindTreeBuilder:
 
             # add node to it's parent
             parent = stack[-1]
-            if (parent == root_node):
-                # need because we don't know expected call count for the root_node
-                parent.subcalls.append(node)
-            else:
-                parent.subcalls[stack_pos[-1]] = node
-                # reduce parent stack pos
-                stack_pos[-1] -= 1
+            parent.subcalls[stack_pos[-1]] = node
+            
+            # reduce parent's position
+            stack_pos[-1] -= 1
 
             # fill stacks
             stack.append(node)
             stack_pos.append(node_pos)
 
             # clean up stack
-            while stack_pos[-1] == -1: # position is -1
+            while stack_pos and stack_pos[-1] == -1: # position is -1
                 del stack[-1], stack_pos[-1]
-
-        # reverse the root_node's subcalls separately
-        root_node.subcalls.reverse()
 
         # create a tree and fill it with previously calculated data
         tree = CallTree()
@@ -153,7 +150,24 @@ class XdebugCachegrindTreeBuilder:
         tree.max_call_count = 1
         tree.max_self_time = max_self_time
         tree.root_node = root_node
+        
         return tree
+    
+    def count_tl_calls(self, body):
+        """
+        Explicitly calculate number of top level calls because
+        there is no single root entry yet.
+        """
+        tl_count = 0
+        count = 1
+        for entry in reversed(body):
+            count -= 1
+            count += len(entry.get_subcalls())
+            if count == 0:
+                tl_count += 1
+            if str(entry.fn) == '{main}':
+                break        
+        return tl_count + 1
 
 
 class CallTreeFilter:
