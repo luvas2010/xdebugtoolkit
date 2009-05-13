@@ -108,17 +108,16 @@ class XdebugCachegrindTreeBuilder:
         body_obj = self.parser.get_body()
         body = body_obj.get_body()
 
+        from datetime import datetime
+        start = datetime.now()
+
         max_self_time = 0
         nodes = []
         stack = []
         root_node = AggregatedCall(None, None)
         stack.append([0, -1])
         nodes.append(root_node)
-        i = len(body)
-        while i > 0:
-            i -= 1
-            entry = body[i];
-
+        for entry in reversed(body):
             inclusive_time = entry.self_time + sum([x.inclusive_time for x in entry.get_subcalls()])
             
             # update tree-wide max_self_time
@@ -140,7 +139,7 @@ class XdebugCachegrindTreeBuilder:
             expected_calls = len(entry.get_subcalls())
 
             # fill stack
-            stack.append([node_id, expected_calls])
+            stack.append((node_id, expected_calls))
 
             # clean up stack
             j = len(stack) - 1
@@ -148,7 +147,7 @@ class XdebugCachegrindTreeBuilder:
                 # fix reverse order in filled nodes
                 nodes[stack[j][0]].subcalls.reverse()
         
-                del(stack[j])
+                del stack[j]
                 j -= 1
 
         # reverse the root_node's subcalls separately
@@ -163,6 +162,8 @@ class XdebugCachegrindTreeBuilder:
         tree.max_call_count = 1
         tree.max_self_time = max_self_time
         tree.root_node = root_node
+        end = datetime.now()
+        print end - start
         return tree
 
 
@@ -172,7 +173,7 @@ class CallTreeFilter:
         stack = [tree.root_node]
         stack_pos = [-1, 0]
 
-        while len(stack):
+        while stack:
             stack.append(stack[-1].subcalls[stack_pos[-1]])
             stack_pos[-1] += 1
             stack_pos.append(0)
@@ -181,15 +182,14 @@ class CallTreeFilter:
                 stack[-1].subcalls = []
                 
             # cleanup stack
-            while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
-                del(stack[-1])
-                del(stack_pos[-1])
+            while stack and len(stack[-1].subcalls) == stack_pos[-1]:
+                del stack[-1], stack_pos[-1]
 
     def filter_inclusive_time(self, tree, percent_threshold):
         stack = [tree.root_node]
         stack_pos = [-1, 0]
 
-        while len(stack):
+        while stack:
             parent = stack[-1]
             call = parent.subcalls[stack_pos[-1]]
             if call.sum_inclusive_time > tree.get_total_time() * percent_threshold / 100:
@@ -200,9 +200,8 @@ class CallTreeFilter:
                 parent.subcalls[stack_pos[-1]:stack_pos[-1]+1] = []
                 
             # cleanup stack
-            while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
-                del(stack[-1])
-                del(stack_pos[-1])
+            while stack and len(stack[-1].subcalls) == stack_pos[-1]:
+                del stack[-1], stack_pos[-1]
         
 
 class CallTreeAggregator:
@@ -225,7 +224,7 @@ class CallTreeAggregator:
 
         new_root_node.merge(stack[-1])
         
-        while len(stack):
+        while stack:
             stack.append(stack[-1].subcalls[stack_pos[-1]])
             stack_pos[-1] += 1
             stack_pos.append(0)
@@ -250,10 +249,8 @@ class CallTreeAggregator:
             max_self_time = max(max_self_time, call.sum_self_time)
 
             # cleanup stack
-            while len(stack) and len(stack[-1].subcalls) == stack_pos[-1]:
-                del(stack[-1])
-                del(stack_pos[-1])
-                del(stack_path[-2:])
+            while stack and len(stack[-1].subcalls) == stack_pos[-1]:
+                del stack[-1], stack_pos[-1], stack_path[-2:]
                 
         new_tree = CallTree()
         new_tree.root_node = new_root_node
