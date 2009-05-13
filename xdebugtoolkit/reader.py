@@ -109,51 +109,45 @@ class XdebugCachegrindTreeBuilder:
         body = body_obj.get_body()
 
         max_self_time = 0
-        nodes = []
         stack = []
+        stack_pos = []
         root_node = AggregatedCall(None, None)
-        stack.append([0, -1])
-        nodes.append(root_node)
-        for entry in reversed(body):
-            inclusive_time = entry.self_time + sum([x.inclusive_time for x in entry.get_subcalls()])
-            
+        stack.append(root_node)
+        stack_pos.append(-2)      
+        for entry in reversed(body):            
             # update tree-wide max_self_time
             max_self_time = max(max_self_time, entry.self_time)
 
+            # create node
             node = AggregatedCall(entry.fl, entry.fn);
+            inclusive_time = entry.self_time + sum([x.inclusive_time for x in entry.get_subcalls()])
             node.add_call(entry.fl, entry.fn, entry.self_time, inclusive_time)
-
-            node_id = len(nodes)
-            nodes.append(node)
-
-            parent_id, parent_expected_calls = stack[-1]
-            parent = nodes[parent_id]
+            subcalls_count = len(entry.get_subcalls());
+            node_pos = subcalls_count - 1
+            node.subcalls = [None] * subcalls_count # init subcalls
 
             # add node to it's parent
-            # at the moment they are in the reverse order
-            parent.subcalls.append(node)
+            parent = stack[-1]
+            if (parent == root_node):
+                # need because we don't know expected call count for the root_node
+                parent.subcalls.append(node)
+            else:
+                parent.subcalls[stack_pos[-1]] = node
+                # reduce parent stack pos
+                stack_pos[-1] -= 1
 
-            expected_calls = len(entry.get_subcalls())
-
-            # fill stack
-            stack.append((node_id, expected_calls))
+            # fill stacks
+            stack.append(node)
+            stack_pos.append(node_pos)
 
             # clean up stack
-            j = len(stack) - 1
-            while len(nodes[stack[j][0]].subcalls) == stack[j][1]:
-                # fix reverse order in filled nodes
-                nodes[stack[j][0]].subcalls.reverse()
-        
-                del stack[j]
-                j -= 1
+            while stack_pos[-1] == -1: # position is -1
+                del stack[-1], stack_pos[-1]
 
         # reverse the root_node's subcalls separately
         root_node.subcalls.reverse()
-        
-        # calculate inclusive_time for the root_node separately
-        inclusive_time = sum([x.sum_inclusive_time for x in root_node.subcalls])
-        root_node.add_call(None, None, 0, inclusive_time)
 
+        # create a tree and fill it with previously calculated data
         tree = CallTree()
         tree.total_call_count = len(body)
         tree.max_call_count = 1
