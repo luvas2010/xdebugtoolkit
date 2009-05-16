@@ -89,9 +89,10 @@ class CallTree:
     
     def __str__(self):
         return str({
-            'max_self_time': self.max_self_time,
-            'max_call_count': self.max_call_count,
-            'total_call_count': self.total_call_count,
+            'max_self_time': self.get_max_self_time(),
+            'total_time': self.get_total_time(),
+            'max_call_count': self.get_max_call_count(),
+            'total_call_count': self.get_total_call_count(),
         })
 
 class XdebugCachegrindTreeBuilder:
