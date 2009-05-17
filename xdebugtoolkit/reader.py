@@ -184,6 +184,10 @@ class XdebugCachegrindTreeBuilder:
             while stack_pos and stack_pos[-1] == -1: # position is -1
                 del stack[-1], stack_pos[-1]
 
+        # calculate inclusive_time for the root_node separately
+        inclusive_time = sum([x.sum_inclusive_time for x in root_node.subcalls])
+        root_node.add_call(None, None, 0, inclusive_time)
+
         # create a tree and fill it with previously calculated data
         tree = CallTree()
         tree.total_call_count = len(body)
