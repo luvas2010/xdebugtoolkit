@@ -21,7 +21,7 @@ class Test(unittest.TestCase):
         tree = self.tree_builder.get_tree()
         print tree
         self.assertEquals(tree.get_max_self_time(), 23525)
-        self.fail('tree.get_total_time() test is not implemented yet')
+        self.assertEquals(tree.get_total_time(), 23798)
         self.assertEquals(tree.get_max_call_count(), 1)
         self.assertEquals(tree.get_total_call_count(), 14)
 
