@@ -1,6 +1,19 @@
 import cgparser
 
 class AggregatedCall(object):
+    """
+    Aggregated call is a holder for statistic information about multiple
+    calls of the same function (written in the same file) same w/o storing
+    detailed information about them.
+    
+    It stores such info:
+     * file and function name. This is immutable after creation and the class
+       allows to add/merge calls only with the same ones.
+     * call_count which is initially = 0;
+       add_call() increments the call_count value by 1;
+       merge() sums call_count values.
+     * min_, max_ and sum_ for self and inclusive times.
+    """
     
     __slots__ = ('fn', 'fl', 'subcalls', 'call_count',
                  'min_self_time', 'max_self_time', 'sum_self_time',
@@ -19,14 +32,40 @@ class AggregatedCall(object):
         self.sum_inclusive_time = 0
     
     def add_call(self, fl, fn, self_time, inclusive_time):
+        """
+        Add a single sibling call (not subcall) to the AggregatedCall.
+        Single call means that it's:
+         * call_count = 1
+         * min_self_time = max_self_time = sum_self_time
+         * min_inclusive_time = max_inclusive_time = sum_inclusive_time
+        
+        It doesn't add any subcalls.
+        """
         self._merge(fl, fn, 1, self_time, self_time, self_time, inclusive_time, inclusive_time, inclusive_time)
 
     def merge(self, call):
+        """
+        Merge with another aggregated call.
+        Aggregated call can have:
+         * call_count >= 0
+         * different min_, max_ and sum_ _self and _inclusive times
+        
+        It doesn't merge any subcalls.
+        """
         if call.call_count > 0:
             self._merge(call.fl, call.fn, call.call_count, call.min_self_time, call.max_self_time, call.sum_self_time, call.min_inclusive_time, call.max_inclusive_time, call.sum_inclusive_time)
             
     def _merge(self, fl, fn, call_count, min_self_time, max_self_time, sum_self_time,
                min_inclusive_time, max_inclusive_time, sum_inclusive_time):
+        """
+        Merge routine:
+         * requires that 2 calls' have identical fl and fn.
+         * sums call_count, sum_self_ and sum_inclusive_ times.
+         * minimizes min_self_ and min_inclusive_ times.
+         * maximizes min_self_ and max_inclusive_ times.
+        
+        It doesn't merge any subcalls.
+        """
         assert self.fl == fl
         assert self.fn == fn
 
