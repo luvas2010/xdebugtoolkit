@@ -19,7 +19,6 @@ class Test(unittest.TestCase):
 
     def testGetTree(self):
         tree = self.tree_builder.get_tree()
-        print tree
         self.assertEquals(tree.get_max_self_time(), 23525)
         self.assertEquals(tree.get_total_time(), 23798)
         self.assertEquals(tree.get_max_call_count(), 1)
