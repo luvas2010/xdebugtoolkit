@@ -37,6 +37,17 @@ class Test(unittest.TestCase):
         self.assertEquals(empty_tree.get_max_call_count(), 1)
         self.assertEquals(empty_tree.get_total_call_count(), 14)
 
+    def testAggregate(self):
+        tree = self.tree_builder.get_tree()
+        tree2 = CallTreeAggregator().aggregate_call_paths(tree)
+        
+        # need more specific fixture to test this. This one didn't
+        # made the value higher.
+        self.assertEquals(tree2.get_max_self_time(), 23525)
+        
+        self.assertEquals(tree2.get_total_time(), 23798)
+        self.assertEquals(tree2.get_max_call_count(), 4)
+        self.assertEquals(tree2.get_total_call_count(), 14)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
