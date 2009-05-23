@@ -10,7 +10,7 @@ from cgparser import *
 class Test(unittest.TestCase):
     
     #filename = 'fixtures/cachegrind.out.2776'
-    filename = 'fixtures/1241577166_325172.cg'
+    filename = 'fixtures/1243043583_646499.cg'
     
     def setUp(self):
         self.parser = XdebugCachegrindFsaParser(self.filename)
@@ -20,7 +20,7 @@ class Test(unittest.TestCase):
         self.assertEqual(header.get_version(), '0.9.6')
         self.assertEqual(header.get_part(), '1')
         self.assertEqual(header.get_events(), 'Time')
-        self.assertEqual(header.get_cmd(), '/tmp/xdebug/1.php')
+        self.assertEqual(header.get_cmd(), '/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/1.php')
 
     def testBodyTypes(self):
         body = self.parser.get_body()
