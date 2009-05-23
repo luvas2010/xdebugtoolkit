@@ -202,16 +202,17 @@ class XdebugCachegrindTreeBuilder:
         Explicitly calculate number of top level calls because
         there is no single root entry yet.
         """
-        tl_count = 0
+        tl_count = 1
         count = 1
         for entry in reversed(body):
             count -= 1
             count += len(entry.get_subcalls())
             if count == 0:
                 tl_count += 1
+                count += 1
             if str(entry.fn) == '{main}':
-                break        
-        return tl_count + 1
+                break
+        return tl_count
 
 
 class CallTreeFilter:
