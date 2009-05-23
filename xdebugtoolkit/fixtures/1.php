@@ -13,9 +13,12 @@
     }
   }
 
-  function c() {}
+  function c() {
+  }
 
-  function d() {}
+  function d() {
+    usleep(100000);
+  }
 
   $a1 = new a;
   $b = new b;
@@ -25,3 +28,5 @@
   d();
   c();
 
+  register_shutdown_function('c');
+  register_shutdown_function('c');
