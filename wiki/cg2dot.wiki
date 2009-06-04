@@ -1,0 +1,43 @@
+#summary Cg to dot converter
+
+=Usage=
+{{{
+$ ./cg2dot.py --help
+Usage: cg2dot.py [options] file [file ...]
+
+Options:
+  -h, --help            show this help message and exit
+  -t THRESHOLD, --threshold=THRESHOLD
+                        remove fast tails that took less then this percent of
+                        total execution time. Default is 1%.
+  -a MODE, --aggregate=MODE
+                        aggregation mode. Can have values "none" and "func-
+                        file". The "none" means that aggregation will be
+                        completely off. This is usually very memory wasting,
+                        so use it very carefully especially with the xdot. The
+                        "func-file" mode means that each call will be keyed by
+                        (mapped to) file and function names of every call from
+                        it's stack. Then all calls will be aggregated
+                        (reduced) according to these keys. Default is "func-
+                        file".
+}}}
+
+=Examples=
+render as png
+{{{
+./cg2dot.py some.cg | path_to_dot/dot -Tpng -osome.png
+}}}
+
+view in xdot
+{{{
+./cg2dot.py some.cg | path_to_xdot/xdot.py -
+}}}
+
+===Screenshots===
+[http://xdebugtoolkit.googlecode.com/svn/wiki/small_screenshot.png]
+
+[Screenshots]
+
+===Performance===
+cg2dot processes (lexer + tree builder + tree aggregator + dot generator) about 1.6mb of raw cg per second on Core™2 Duo P7350 2.0GHz.
+Lexer takes about half of this time.
