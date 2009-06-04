@@ -1,6 +1,6 @@
 #summary Cg to dot converter
 
-=Usage=
+==Usage==
 {{{
 $ ./cg2dot.py --help
 Usage: cg2dot.py [options] file [file ...]
@@ -22,7 +22,7 @@ Options:
                         file".
 }}}
 
-=Examples=
+==Examples==
 render as png
 {{{
 ./cg2dot.py some.cg | path_to_dot/dot -Tpng -osome.png
@@ -33,11 +33,11 @@ view in xdot
 ./cg2dot.py some.cg | path_to_xdot/xdot.py -
 }}}
 
-===Screenshots===
+==Screenshots==
 [http://xdebugtoolkit.googlecode.com/svn/wiki/small_screenshot.png]
 
 [Screenshots]
 
-===Performance===
+==Performance==
 cg2dot processes (lexer + tree builder + tree aggregator + dot generator) about 1.6mb of raw cg per second on Core™2 Duo P7350 2.0GHz.
 Lexer takes about half of this time.
