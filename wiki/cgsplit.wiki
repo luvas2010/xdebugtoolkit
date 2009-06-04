@@ -1,6 +1,6 @@
 #summary Splitter for appended cg files.
 
-= Usage =
+==Usage==
 
 {{{
 $ ./cgsplit.py --help
@@ -10,12 +10,12 @@ Options:
   -h, --help  show this help message and exit
 }}}
 
-= Example =
+==Example==
 {{{
 ./cgsplit.py fixtures/tth.cg; ./cg2dot.py tth.*.cg | ./xdot.py -
 }}}
 
-= Details =
+==Details==
 
 When you use xdebug extension with [http://www.xdebug.org/docs/profiler#profiler_append xdebug.profiler_append] option enabled, xdebug produces files that can not be currently handled directly by the cg2dot.py tool.
 
