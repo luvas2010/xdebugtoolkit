@@ -1,5 +1,5 @@
 #summary Splitter for appended cg files.
-#labels Tool
+#labels Tool,Featured
 
 ==Usage==
 
