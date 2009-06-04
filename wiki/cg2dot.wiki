@@ -1,5 +1,5 @@
 #summary Cg to dot converter
-#labels Tool
+#labels Tool,Featured
 
 ==Usage==
 {{{
