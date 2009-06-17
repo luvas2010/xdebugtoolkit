@@ -1,5 +1,8 @@
-= CodeIgniter profiling example =
-Opened with xdot (under Ubuntu):
+= !CodeIgniter profiling example =
+xdot, ubuntu:
 
 [http://xdebugtoolkit.googlecode.com/svn/wiki/small_screenshot.png]
+
+Ubigraph, ubuntu:
+
 [http://xdebugtoolkit.googlecode.com/svn/wiki/ubigraph_screenshot.png]
