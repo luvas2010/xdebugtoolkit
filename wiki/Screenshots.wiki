@@ -2,3 +2,4 @@
 Opened with xdot (under Ubuntu):
 
 [http://xdebugtoolkit.googlecode.com/svn/wiki/small_screenshot.png]
+[http://xdebugtoolkit.googlecode.com/svn/wiki/ubigraph_screenshot.png]
