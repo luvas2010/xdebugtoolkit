@@ -53,7 +53,7 @@ view in xdot
 === Aggregation ===
 The 'none' mode doesn't merge calls at all. It's the most detailed view of the profile.
 
-The 'func-file' mode produces much more compact trees. If you look at the example tree above you will find that there are few calls of the d() function not aggregated with each other. This is because these calls have diffent call stacks:
+The 'func-file' mode produces much more compact trees. If you look at the example tree above you will find that there are still few calls of the d() function not aggregated with each other. This is because these calls have diffent call stacks:
   * {{{root -> {main} -> a -> c -> d}}}
   * {{{root -> {main} -> b -> c -> d}}}
   * {{{root -> b -> c -> d}}}
