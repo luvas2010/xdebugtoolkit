@@ -6,7 +6,7 @@ The cg2dot utility is a converter from Xdebug cachegrind files to the [http://ww
 
 The most handy dot viewer is José Fonseca's [http://code.google.com/p/jrfonseca/wiki/XDot xdot].
 
-One of the main advantages over other utilities like KCacheGrind and !WebGrind is the way cg2dot aggregates calls. It makes call graphs very compact, but still preserves their tree structure, so these graphs stay very clear. For example [http://code.google.com/p/xdebugtoolkit/source/browse/trunk/xdebugtoolkit/fixtures/2.php?r=92 this php code] being aggregated produces the following tree:
+One of the main advantages over other utilities like KCacheGrind and !WebGrind is the way cg2dot aggregates calls. It makes call graphs very compact, but still preserves their tree structure, so these graphs stay very clear. For example [http://code.google.com/p/xdebugtoolkit/source/browse/trunk/xdebugtoolkit/fixtures/2.php?r=92 this PHP code] being aggregated produces the following tree:
 
 [http://xdebugtoolkit.googlecode.com/svn/wiki/aggregate_demo.png]
 
@@ -50,7 +50,15 @@ view in xdot
 
 == Details ==
 
+=== Colorizing ===
+Near-<font color='#CCCCCC'>gray</font> nodes are fast and rarely called. Nothing interesting.
 
-== Performance ==
+Grade of <font color='#CCCC00'>yellow</font> means call count of an aggregated call.
+
+Grade of <font color='#CC00CC'>magenta</font> expresses call's self time.
+
+If some node were called often and took a lot of time, it will be colored near-<font color='#cc0000'>red</font>. Red calls are usually the bottlenecks you should optimize first.
+
+=== Performance ===
 cg2dot processes (lexer + tree builder + tree aggregator + dot generator) about 1.6mb of raw cg per second on Core™2 Duo P7350 2.0GHz.
 Lexer takes about half of this time.
