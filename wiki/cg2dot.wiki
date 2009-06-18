@@ -50,14 +50,30 @@ view in xdot
 
 == Details ==
 
+=== Aggregation ===
+The 'none' mode doesn't merge calls at all. It's the most detailed view of the profile.
+
+The 'func-file' mode produces much more compact trees.
+
+=== Labels ===
+{{{4x[1ms..24ms] = 53ms}}} means the following:
+
+  * the aggregated call aggregates 4 single calls
+  * minimal single call's time is 1ms
+  * maximum single call's time is 24ms
+  * total time of the 4 calls is 53ms.
+  * average call time is 53ms/4 = 13.25ms
+
+<font color='#999999'> NB: You can meet labels like {{{1000x[0ms..0ms] = 10ms}}}. This can happen due to rounding to integer milliseconds and actually mean something like {{{1000x[0.005ms..0.015ms] = 10ms}}}</font>
+
 === Colorizing ===
-Near-<font color='#CCCCCC'>gray</font> nodes are fast and rarely called. Nothing interesting.
+<font color='#CCCCCC'>█</font> Near-gray nodes are fast and rarely called. Nothing interesting.
 
-Grade of <font color='#CCCC00'>yellow</font> means call count of an aggregated call.
+<font color='#CCCC00'>█</font> Grade of yellow means call count of an aggregated call. If you use --aggregate=none all calls are considered single therefore have zero yellow grade.
 
-Grade of <font color='#CC00CC'>magenta</font> expresses call's self time.
+<font color='#CC00CC'>█</font> Grade of magenta expresses call's self time.
 
-If some node were called often and took a lot of time, it will be colored near-<font color='#cc0000'>red</font>. Red calls are usually the bottlenecks you should optimize first.
+<font color='#CC0000'>█</font> If some node were called often and took a lot of time, it will have both yellow and magenta colors mixed so it will be colored near-<font color='#cc0000'>red</font>. Red calls are usually the bottlenecks you should optimize first.
 
 === Performance ===
 cg2dot processes (lexer + tree builder + tree aggregator + dot generator) about 1.6mb of raw cg per second on Core™2 Duo P7350 2.0GHz.
