@@ -1,7 +1,16 @@
 #summary Cg to dot converter
 #labels Tool,Featured
 
-==Usage==
+== Introduction ==
+The cg2dot utility is a converter from Xdebug cachegrind files to the [http://www.graphviz.org/ dot format].
+
+The most handy dot viewer is José Fonseca's [http://code.google.com/p/jrfonseca/wiki/XDot xdot].
+
+One of the main advantages over other utilities like KCacheGrind and WebGrind is the way cg2dot aggregates calls. It makes call graphs very compact, but still preserves their tree structure, so these graphs stay very clear. For example [http://code.google.com/p/xdebugtoolkit/source/browse/trunk/xdebugtoolkit/fixtures/2.php?r=92 this php code] being aggregated produces the following tree:
+
+[http://xdebugtoolkit.googlecode.com/svn/wiki/aggregate_demo.png]
+
+== Usage ==
 {{{
 $ ./cg2dot.py --help
 Usage: cg2dot.py [options] file [file ...]
@@ -23,7 +32,7 @@ Options:
                         file".
 }}}
 
-==Examples==
+== Examples ==
 render as png
 {{{
 ./cg2dot.py some.cg | path_to_dot/dot -Tpng -osome.png
@@ -34,11 +43,14 @@ view in xdot
 ./cg2dot.py some.cg | path_to_xdot/xdot.py -
 }}}
 
-==Screenshots==
+== Screenshots ==
 [http://xdebugtoolkit.googlecode.com/svn/wiki/small_screenshot.png]
 
 [Screenshots]
 
-==Performance==
+== Details ==
+
+
+== Performance ==
 cg2dot processes (lexer + tree builder + tree aggregator + dot generator) about 1.6mb of raw cg per second on Core™2 Duo P7350 2.0GHz.
 Lexer takes about half of this time.
