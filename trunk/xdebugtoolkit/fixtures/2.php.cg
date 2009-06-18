@@ -1,0 +1,157 @@
+version: 0.9.6
+cmd: /var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+part: 1
+
+events: Time
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=d
+17 46
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=c
+5 135
+cfn=d
+calls=1 0 0
+17 46
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=d
+17 39
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=c
+6 102
+cfn=d
+calls=1 0 0
+17 39
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=a
+24 200
+cfn=c
+calls=1 0 0
+5 181
+cfn=c
+calls=1 0 0
+6 142
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=d
+17 37
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=c
+5 91
+cfn=d
+calls=1 0 0
+17 37
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=d
+17 39
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=c
+6 100
+cfn=d
+calls=1 0 0
+17 39
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=a
+25 131
+cfn=c
+calls=1 0 0
+5 128
+cfn=c
+calls=1 0 0
+6 139
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=d
+17 39
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=c
+11 89
+cfn=d
+calls=1 0 0
+17 39
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=d
+17 38
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=c
+12 98
+cfn=d
+calls=1 0 0
+17 38
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=b
+26 124
+cfn=c
+calls=1 0 0
+11 128
+cfn=c
+calls=1 0 0
+12 137
+
+fl=php:internal
+fn=php::register_shutdown_function
+27 25
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn={main}
+
+summary: 1536
+
+0 194
+cfn=a
+calls=1 0 0
+24 524
+cfn=a
+calls=1 0 0
+25 400
+cfn=b
+calls=1 0 0
+26 391
+cfn=php::register_shutdown_function
+calls=1 0 0
+27 25
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=d
+17 40
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=c
+11 91
+cfn=d
+calls=1 0 0
+17 40
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=d
+17 39
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=c
+12 99
+cfn=d
+calls=1 0 0
+17 39
+
+fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
+fn=b
+0 126
+cfn=c
+calls=1 0 0
+11 131
+cfn=c
+calls=1 0 0
+12 138
+
