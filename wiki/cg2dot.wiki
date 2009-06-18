@@ -56,6 +56,8 @@ The 'func-file' mode produces much more compact trees. If you look at the exampl
   * {{{root -> {main} -> b -> c -> d}}}
   * {{{root -> b -> c -> d}}}
 
+You don't want your graphs look like [http://pycallgraph.slowchop.com/pycallgraph these], do you? :)
+
 === Labels ===
 {{{4x[1ms..24ms] = 53ms}}} means the following:
 
