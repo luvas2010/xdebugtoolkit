@@ -2,23 +2,25 @@
 
 function a() {
   print __FUNCTION__ . "\n";
-  c();
-  c();
+  c(100);
+  c(1000);
 }
 
 function b() {
   print __FUNCTION__ . "\n";
-  c();
-  c();
+  c(10000);
+  c(100000);
 }
 
-function c() {
+function c($c) {
   print " " . __FUNCTION__ . "\n";
-  d();
+  for ($i = 0; $i < $c; $i++) {}
+  d(10000000 / $c / 4);
 }
 
-function d() {
+function d($c) {
   print "  " . __FUNCTION__ . "\n";
+  for ($i = 0; $i < $c; $i++) {}
 }
 
 a();

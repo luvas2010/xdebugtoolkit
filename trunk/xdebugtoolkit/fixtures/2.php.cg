@@ -6,152 +6,152 @@ events: Time
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=d
-17 46
+18 24872
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=c
-5 135
+5 381
 cfn=d
 calls=1 0 0
-17 46
+18 24872
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=d
-17 39
+18 1765
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=c
-6 102
+6 864
 cfn=d
 calls=1 0 0
-17 39
+18 1765
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=a
-24 200
+26 332
 cfn=c
 calls=1 0 0
-5 181
+5 25254
 cfn=c
 calls=1 0 0
-6 142
+6 2630
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=d
-17 37
+18 24685
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=c
-5 91
+5 272
 cfn=d
 calls=1 0 0
-17 37
+18 24685
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=d
-17 39
+18 1801
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=c
-6 100
+6 2231
 cfn=d
 calls=1 0 0
-17 39
+18 1801
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=a
-25 131
+27 235
 cfn=c
 calls=1 0 0
-5 128
+5 24958
 cfn=c
 calls=1 0 0
-6 139
+6 4033
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=d
-17 39
+18 339
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=c
-11 89
+11 11556
 cfn=d
 calls=1 0 0
-17 39
+18 339
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=d
-17 38
+18 28
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=c
-12 98
+12 60932
 cfn=d
 calls=1 0 0
-17 38
+18 28
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=b
-26 124
+28 194
 cfn=c
 calls=1 0 0
-11 128
+11 11896
 cfn=c
 calls=1 0 0
-12 137
+12 60961
 
 fl=php:internal
 fn=php::register_shutdown_function
-27 25
+29 28
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn={main}
 
-summary: 1536
+summary: 130678
 
-0 194
+0 153
 cfn=a
 calls=1 0 0
-24 524
+26 28217
 cfn=a
 calls=1 0 0
-25 400
+27 29227
 cfn=b
 calls=1 0 0
-26 391
+28 73051
 cfn=php::register_shutdown_function
 calls=1 0 0
-27 25
+29 28
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=d
-17 40
+18 73
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=c
-11 91
+11 2653
 cfn=d
 calls=1 0 0
-17 40
+18 73
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=d
-17 39
+18 118
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=c
-12 99
+12 39909
 cfn=d
 calls=1 0 0
-17 39
+18 118
 
 fl=/var/www/xdebugtoolkit-trunk/xdebugtoolkit/fixtures/2.php
 fn=b
-0 126
+0 41
 cfn=c
 calls=1 0 0
-11 131
+11 2727
 cfn=c
 calls=1 0 0
-12 138
+12 40027
 
