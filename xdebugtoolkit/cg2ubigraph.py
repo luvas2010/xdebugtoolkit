@@ -28,16 +28,7 @@ if __name__ == '__main__':
         xdebug_parser = XdebugCachegrindFsaParser(file)
         tree = XdebugCachegrindTreeBuilder(xdebug_parser).get_tree()
         merged_tree.merge(tree)
-        if options.aggregate == 'func-file':
-            import datetime
-            t = tree_aggregator.aggregate_call_paths(merged_tree)
-            times = []
-            for i in xrange(10):
-                #start = datetime.datetime.now()
-                t = tree_aggregator.aggregate_call_paths(merged_tree)
-                #end = datetime.datetime.now()
-                #times.append(str(end - start))
-            #print sorted(times)
+        if options.mode == 'func-file':
             merged_tree = tree_aggregator.aggregate_call_paths(merged_tree)
 
     merged_tree.filter_inclusive_time(options.threshold)
