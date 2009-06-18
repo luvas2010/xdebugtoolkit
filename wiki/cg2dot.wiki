@@ -6,7 +6,7 @@ The cg2dot utility is a converter from Xdebug cachegrind files to the [http://ww
 
 The most handy dot viewer is José Fonseca's [http://code.google.com/p/jrfonseca/wiki/XDot xdot].
 
-One of the main advantages over other utilities like KCacheGrind and WebGrind is the way cg2dot aggregates calls. It makes call graphs very compact, but still preserves their tree structure, so these graphs stay very clear. For example [http://code.google.com/p/xdebugtoolkit/source/browse/trunk/xdebugtoolkit/fixtures/2.php?r=92 this php code] being aggregated produces the following tree:
+One of the main advantages over other utilities like KCacheGrind and !WebGrind is the way cg2dot aggregates calls. It makes call graphs very compact, but still preserves their tree structure, so these graphs stay very clear. For example [http://code.google.com/p/xdebugtoolkit/source/browse/trunk/xdebugtoolkit/fixtures/2.php?r=92 this php code] being aggregated produces the following tree:
 
 [http://xdebugtoolkit.googlecode.com/svn/wiki/aggregate_demo.png]
 
