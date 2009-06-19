@@ -72,13 +72,13 @@ You don't want your graphs look like [http://pycallgraph.slowchop.com/pycallgrap
 <font color='#999999'> NB: You can meet labels like {{{1000x[0ms..0ms] = 10ms}}}. This can happen due to rounding to integer milliseconds and actually mean something like {{{1000x[0.005ms..0.015ms] = 10ms}}}</font>
 
 === Node colorizing ===
-<font color='#CCCCCC'>█</font> Nodes colored with shades of gray or so are fast and rarely called. There is usually nothing interesting.
+<font color='#CCCCCC'>█</font> Nodes colored with shades near to gray or so are fast and rarely called. There is usually nothing interesting.
 
 <font color='#CCCC00'>█</font> Grade of yellow means call count of an aggregated call. If you use --aggregate=none all calls are considered single therefore have zero yellow grade.
 
 <font color='#CC00CC'>█</font> Grade of magenta expresses call's self time.
 
-<font color='#CC0000'>█</font> If some node were called often and took a lot of time, it will have both yellow and magenta colors mixed so it will be colored near-<font color='#cc0000'>red</font>. Red calls are usually the bottlenecks you should optimize first.
+<font color='#CC0000'>█</font> If some node were called often and took a lot of time, it will have both yellow and magenta colors mixed so it will be colored near-red. Red calls are usually the bottlenecks you should optimize first.
 
 === Edges ===
 Edges vary in their width due to their inclusive time. Most thick edges are at the top of the tree. Going deeper they split into few thiner edges and lose weight for nodes' self time. This allows you to easily track critical paths leading to most expensive operations.
