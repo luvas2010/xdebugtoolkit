@@ -1,8 +1,13 @@
-= !CodeIgniter profiling example =
-xdot, ubuntu:
+= Examples =
 
-[http://xdebugtoolkit.googlecode.com/svn/wiki/small_screenshot.png]
+Symfony in debug mode, xdot, ubuntu:
 
-Ubigraph, ubuntu:
+[http://xdebugtoolkit.googlecode.com/svn/wiki/symfony_debug.png]
+
+!CodeIgniter, xdot, ubuntu:
+
+[http://xdebugtoolkit.googlecode.com/svn/wiki/codeigniter.png]
+
+!CodeIgniter, Ubigraph, ubuntu:
 
 [http://xdebugtoolkit.googlecode.com/svn/wiki/ubigraph_screenshot.png]
