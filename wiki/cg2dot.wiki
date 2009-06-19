@@ -15,16 +15,16 @@ Check the details section below for more info.
 == Usage ==
 {{{
 $ ./cg2dot.py --help
-Usage: cg2dot.py [options] file [file ...]
+Usage: ./cg2dot.py [options] file [file ...]
 
 Options:
   -h, --help            show this help message and exit
-  -t THRESHOLD, --threshold=THRESHOLD
-                        remove fast tails that took less then this percent of
-                        total execution time. Default is 1%.
+  -t PERCENT, --threshold=PERCENT
+                        remove fast tails that took less then PERCENT of total
+                        execution time. Default is 1%.
   -a MODE, --aggregate=MODE
-                        aggregation mode. Can have values "none" and "func-
-                        file". The "none" means that aggregation will be
+                        aggregation mode. MODE can have values "none" and
+                        "func-file". The "none" means that aggregation will be
                         completely off. This is usually very memory wasting,
                         so use it very carefully especially with the xdot. The
                         "func-file" mode means that each call will be keyed by
