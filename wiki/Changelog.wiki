@@ -1,0 +1,18 @@
+#labels Featured
+== Changelog ==
+=== 0.1.3 ===
+ * cg2dot: issue #11: Change edge style
+ * cg2dot: minor improvements in the command line usage
+ * cg2dot: root node is now called root instead of -1
+ * added cg2ubigraph: issue #10: Add ubigraph visualization for fun
+
+=== 0.1.2 ===
+ * cg2dot: minor colorizing issue in the --aggregate=none mode
+ * cg2dot: issue #8: Crash on shutdown functions 
+ * added a new cgsplit utility
+
+=== 0.1.1 ===
+ * cg2dot: issue #7: Make aggregation optional
+
+=== 0.1.0 ===
+ initial release
