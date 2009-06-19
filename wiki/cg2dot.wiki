@@ -72,7 +72,7 @@ You don't want your graphs look like [http://pycallgraph.slowchop.com/pycallgrap
 <font color='#999999'> NB: You can meet labels like {{{1000x[0ms..0ms] = 10ms}}}. This can happen due to rounding to integer milliseconds and actually mean something like {{{1000x[0.005ms..0.015ms] = 10ms}}}</font>
 
 === Node colorizing ===
-<font color='#CCCCCC'>█</font> Near-gray nodes are fast and rarely called. Nothing interesting.
+<font color='#CCCCCC'>█</font> Nodes colored with shades of gray or so are fast and rarely called. There is usually nothing interesting.
 
 <font color='#CCCC00'>█</font> Grade of yellow means call count of an aggregated call. If you use --aggregate=none all calls are considered single therefore have zero yellow grade.
 
