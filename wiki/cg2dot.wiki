@@ -81,7 +81,7 @@ You don't want your graphs look like [http://pycallgraph.slowchop.com/pycallgrap
 <font color='#CC0000'>██</font> If some node were called often and took a lot of time, it will have both yellow and magenta colors mixed so it will be colored near-red. Red calls are usually the bottlenecks you should optimize first.
 
 === Edges ===
-Edges vary in their width due to their inclusive time. Most thick edges are at the top of the tree. Going deeper they split into few thiner edges and lose weight for nodes' self time. This allows you to easily track critical paths leading to most expensive operations.
+Edges vary in their width due to their inclusive time. Most thick edges are at the top of the tree. Getting deeper they split into few thiner edges and also lose weight for nodes' self time. This allows you to easily track critical paths leading to most expensive operations.
 
 === Performance ===
 cg2dot processes (lexer + tree builder + tree aggregator + dot generator) about 1.6mb of raw cg per second on Core™2 Duo P7350 2.0GHz.
