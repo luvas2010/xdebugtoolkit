@@ -6,10 +6,10 @@ if __name__ == '__main__':
     
     from optparse import OptionParser
 
-    parser = OptionParser(usage='%prog file [file ...]')
+    parser = OptionParser(usage='./%prog file [file ...]')
     (options, args) = parser.parse_args(sys.argv[1:])
     if len(args) == 0:
-        parser.error('incorrect number of arguments')
+        parser.error('Incorrect number of arguments. Use --help option to print usage.')
 
     separator = '=' * 4 + ' NEW PROFILING FILE ' + '=' * 46 + '\n'
 
