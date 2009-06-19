@@ -19,7 +19,7 @@ if __name__ == '__main__':
                       help='aggregation mode. MODE can have values "none" and "func-file". The "none" means that aggregation will be completely off. This is usually very memory wasting, so use it very carefully especially with the xdot. The "func-file" mode means that each call will be keyed by (mapped to) file and function names of every call from it\'s stack. Then all calls will be aggregated (reduced) according to these keys. Default is "%default".')
     (options, args) = parser.parse_args(sys.argv[1:])
     if len(args) == 0:
-        parser.error('incorrect number of arguments')
+        parser.error('Incorrect number of arguments. Use --help option to print usage.')
     
     merged_tree = CallTree()
     tree_aggregator = CallTreeAggregator()
@@ -28,7 +28,7 @@ if __name__ == '__main__':
         xdebug_parser = XdebugCachegrindFsaParser(file)
         tree = XdebugCachegrindTreeBuilder(xdebug_parser).get_tree()
         merged_tree.merge(tree)
-        if options.mode == 'func-file':
+        if options.aggregate == 'func-file':
             merged_tree = tree_aggregator.aggregate_call_paths(merged_tree)
 
     merged_tree.filter_inclusive_time(options.threshold)
