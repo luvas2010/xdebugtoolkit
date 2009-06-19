@@ -9,14 +9,14 @@ if __name__ == '__main__':
     
     from optparse import OptionParser
 
-    parser = OptionParser(usage='./%prog [options] file [file ...]')
-    parser.add_option('-t', '--threshold', dest='threshold', metavar='PERCENT',
+    parser = OptionParser(usage='%prog [options] file [file ...]')
+    parser.add_option('-t', '--threshold', dest='threshold',
                       action="store", type="float", default=1,
-                      help='remove fast tails that took less then PERCENT of total execution time. Default is %default%.')
-    parser.add_option('-a', '--aggregate', dest='aggregate', metavar='MODE',
+                      help='remove fast tails that took less then this percent of total execution time. Default is %default%.')
+    parser.add_option('-a', '--aggregate', dest='mode',
                       choices=('func-file', 'none'),
                       action="store", default="func-file",
-                      help='aggregation mode. MODE can have values "none" and "func-file". The "none" means that aggregation will be completely off. This is usually very memory wasting, so use it very carefully especially with the xdot. The "func-file" mode means that each call will be keyed by (mapped to) file and function names of every call from it\'s stack. Then all calls will be aggregated (reduced) according to these keys. Default is "%default".')
+                      help='aggregation mode. Can have values "none" and "func-file". The "none" means that aggregation will be completely off. This is usually very memory wasting, so use it very carefully especially with the xdot. The "func-file" mode means that each call will be keyed by (mapped to) file and function names of every call from it\'s stack. Then all calls will be aggregated (reduced) according to these keys. Default is "%default".')
     (options, args) = parser.parse_args(sys.argv[1:])
     if len(args) == 0:
         parser.error('incorrect number of arguments')
