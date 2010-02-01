@@ -6,6 +6,8 @@ The cg2dot utility is a converter from [http://www.xdebug.org/docs/profiler Xdeb
 
 The most handy dot viewer is José Fonseca's [http://code.google.com/p/jrfonseca/wiki/XDot xdot] utility.
 
+If you work with large .dot files you may want to use a tool xdot-pygoocanvas.py provided along with the xdebugtoolkit. It's based on the xdot but the engine is re-written for using pygoocanvas which allow xdot work much faster. For this you'll need to install python-pygoocanvas package (sudo aptitude install python-pygoocanvas) in addition to regular xdot [http://code.google.com/p/jrfonseca/wiki/XDot#Requirements requirements].
+
 One of the main advantages over other programs like KCacheGrind and !WebGrind is the way cg2dot aggregates calls. It makes call graphs very compact preserving their tree structure, so these graphs stay very clear. For example [http://code.google.com/p/xdebugtoolkit/source/browse/trunk/xdebugtoolkit/fixtures/2.php?r=92 this PHP code] being aggregated produces the following tree:
 
 [http://xdebugtoolkit.googlecode.com/svn/wiki/aggregate_demo.png]
@@ -35,14 +37,19 @@ Options:
 }}}
 
 == Examples ==
-render as png
+render as png:
 {{{
 ./cg2dot.py some.cg | path_to_dot/dot -Tpng -osome.png
 }}}
 
-view in xdot
+view in xdot:
 {{{
 ./cg2dot.py some.cg | path_to_xdot/xdot.py -
+}}}
+
+view in xdot-pygocanvas:
+{{{
+./cg2dot.py some.cg | ./xdot-pygoocanvas.py -
 }}}
 
 == Screenshots ==
