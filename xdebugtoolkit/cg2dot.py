@@ -31,7 +31,7 @@ if __name__ == '__main__':
             xdebug_parser = XdebugCachegrindFsaParser(file)
             tree = XdebugCachegrindTreeBuilder(xdebug_parser).get_tree()
         except:
-            sys.stderr.write('Can\'t parse \'%s\' file.\n' % file)
+            sys.stderr.write('Warning: Can\'t parse file \'%s\'.\n' % file)
             if options.ignore:
                 continue
         else: 
