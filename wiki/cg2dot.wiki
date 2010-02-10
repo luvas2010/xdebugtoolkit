@@ -21,6 +21,7 @@ Usage: ./cg2dot.py [options] file [file ...]
 
 Options:
   -h, --help            show this help message and exit
+  -i, --ignore          Ignore files that can't be parsed.
   -t PERCENT, --threshold=PERCENT
                         remove fast tails that took less then PERCENT of total
                         execution time. Default is 1%.
