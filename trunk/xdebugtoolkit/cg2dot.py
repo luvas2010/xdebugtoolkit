@@ -10,6 +10,9 @@ if __name__ == '__main__':
     from optparse import OptionParser
 
     parser = OptionParser(usage='./%prog [options] file [file ...]')
+    parser.add_option('-i', '--ignore',
+                      action="store_false", dest="ignore", default=True,
+                      help='Ignore files that can\'t be parsed.')
     parser.add_option('-t', '--threshold', dest='threshold', metavar='PERCENT',
                       action="store", type="float", default=1,
                       help='remove fast tails that took less then PERCENT of total execution time. Default is %default%.')
@@ -23,13 +26,18 @@ if __name__ == '__main__':
     
     merged_tree = CallTree()
     tree_aggregator = CallTreeAggregator()
-
     for file in args:
-        xdebug_parser = XdebugCachegrindFsaParser(file)
-        tree = XdebugCachegrindTreeBuilder(xdebug_parser).get_tree()
-        merged_tree.merge(tree)
-        if options.aggregate == 'func-file':
-            merged_tree = tree_aggregator.aggregate_call_paths(merged_tree)
+        try:
+            xdebug_parser = XdebugCachegrindFsaParser(file)
+            tree = XdebugCachegrindTreeBuilder(xdebug_parser).get_tree()
+        except:
+            sys.stderr.write('Can\'t parse \'%s\' file.\n' % file)
+            if options.ignore:
+                continue
+        else: 
+            merged_tree.merge(tree)
+            if options.aggregate == 'func-file':
+                merged_tree = tree_aggregator.aggregate_call_paths(merged_tree)
 
     merged_tree.filter_inclusive_time(options.threshold)
     print DotBuilder().get_dot(merged_tree, DotNodeStyler)
