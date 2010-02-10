@@ -19,7 +19,10 @@ class DotBuilder:
         graph.append('"%s" [label="root"];\n' % (self_id, ))
         
         while len(stack):
-            stack.append(stack[-1].subcalls[stack_pos[-1]])
+            try:
+                stack.append(stack[-1].subcalls[stack_pos[-1]])
+            except IndexError:
+                break
             stack_pos[-1] += 1
             stack_pos.append(0)
             
