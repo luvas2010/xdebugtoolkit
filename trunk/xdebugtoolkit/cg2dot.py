@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
     parser = OptionParser(usage='./%prog [options] file [file ...]')
     parser.add_option('-i', '--ignore',
-                      action="store_false", dest="ignore", default=True,
+                      action="store_true", dest="ignore", default=False,
                       help='Ignore files that can\'t be parsed.')
     parser.add_option('-t', '--threshold', dest='threshold', metavar='PERCENT',
                       action="store", type="float", default=1,
@@ -30,10 +30,10 @@ if __name__ == '__main__':
         try:
             xdebug_parser = XdebugCachegrindFsaParser(file)
             tree = XdebugCachegrindTreeBuilder(xdebug_parser).get_tree()
-        except:
-            sys.stderr.write('Warning: Can\'t parse file \'%s\'.\n' % file)
-            if options.ignore:
-                continue
+        except Exception as e:
+            sys.stderr.write('Warning: Can\'t parse file \'%s\'.\nLine: %s\nLiteral: %s' % (file, e[0], e[1]))            
+            if not options.ignore:
+                exit()
         else: 
             merged_tree.merge(tree)
             if options.aggregate == 'func-file':
