@@ -151,11 +151,9 @@ class XdebugCachegrindTreeBuilder:
         max_self_time = 0
         stack = []
         stack_pos = []
-        tl_count = self.count_tl_calls(body)
         root_node = AggregatedCall(None, None)
-        root_node.subcalls = [None] * tl_count
         stack.append(root_node)
-        stack_pos.append(tl_count - 1)
+        stack_pos.append(-2) # hack: root node has unknown number of children
         
         for entry in reversed(body):            
             # update tree-wide max_self_time
@@ -171,7 +169,10 @@ class XdebugCachegrindTreeBuilder:
 
             # add node to it's parent
             parent = stack[-1]
-            parent.subcalls[stack_pos[-1]] = node
+            if parent == root_node:
+                parent.subcalls.insert(0, node)
+            else:
+                parent.subcalls[stack_pos[-1]] = node
             
             # reduce parent's position
             stack_pos[-1] -= 1
@@ -196,23 +197,6 @@ class XdebugCachegrindTreeBuilder:
         tree.root_node = root_node
         
         return tree
-    
-    def count_tl_calls(self, body):
-        """
-        Explicitly calculate number of top level calls because
-        there is no single root entry yet.
-        """
-        tl_count = 1
-        count = 1
-        for entry in reversed(body):
-            count -= 1
-            count += len(entry.get_subcalls())
-            if count == 0:
-                tl_count += 1
-                count += 1
-            if str(entry.fn) == '{main}':
-                break
-        return tl_count
 
 
 class CallTreeFilter:
