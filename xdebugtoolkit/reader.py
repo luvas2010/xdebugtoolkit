@@ -218,6 +218,7 @@ class CallTreeFilter:
                 del stack[-1], stack_pos[-1]
 
     def filter_inclusive_time(self, tree, percent_threshold):
+        time_threshold = tree.get_total_time() * percent_threshold / 100;
         stack = [tree.root_node]
         stack_pos = [-1, 0]
 
@@ -227,7 +228,7 @@ class CallTreeFilter:
                 call = parent.subcalls[stack_pos[-1]]
             except IndexError:
                 return
-            if call.sum_inclusive_time > tree.get_total_time() * percent_threshold / 100:
+            if call.sum_inclusive_time >= time_threshold:
                 stack.append(call)
                 stack_pos[-1] += 1
                 stack_pos.append(0)
