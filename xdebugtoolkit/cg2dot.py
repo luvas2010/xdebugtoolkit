@@ -2,7 +2,7 @@
 
 if __name__ == '__main__':
     import sys
-    from cgparser import XdebugCachegrindFsaParser
+    from cgparser import XdebugCachegrindFsaParser, CgParseError
     from reader import CallTree, CallTreeAggregator, XdebugCachegrindTreeBuilder
     from dot import DotBuilder
     from stylers.default import DotNodeStyler
@@ -30,10 +30,17 @@ if __name__ == '__main__':
         try:
             xdebug_parser = XdebugCachegrindFsaParser(file)
             tree = XdebugCachegrindTreeBuilder(xdebug_parser).get_tree()
-        except Exception as e:
-            sys.stderr.write('Warning: Can\'t parse file \'%s\'.\nLine: %s\nLiteral: %s' % (file, e[0], e[1]))            
+        except CgParseError as e:
+            line_no, line, token = e
+            sys.stderr.write('Warning: Can\'t parse file \'%s\'\n' % file)
+            sys.stderr.write('Line no: %s\n' % line_no)
+            sys.stderr.write('Line: %s\n' % repr(line))
+            sys.stderr.write('Literal: %s\n' % token)
             if not options.ignore:
-                exit()
+                raise
+        except:
+            if not options.ignore:
+                raise
         else: 
             merged_tree.merge(tree)
             if options.aggregate == 'func-file':
