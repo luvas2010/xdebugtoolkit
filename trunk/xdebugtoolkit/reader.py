@@ -224,10 +224,7 @@ class CallTreeFilter:
 
         while stack:
             parent = stack[-1]
-            try:
-                call = parent.subcalls[stack_pos[-1]]
-            except IndexError:
-                return
+            call = parent.subcalls[stack_pos[-1]]
             if call.sum_inclusive_time >= time_threshold:
                 stack.append(call)
                 stack_pos[-1] += 1
