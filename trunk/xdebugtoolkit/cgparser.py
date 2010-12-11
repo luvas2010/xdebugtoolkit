@@ -15,6 +15,9 @@ http://kcachegrind.sourceforge.net/cgi-bin/show.cgi/KcacheGrindCalltreeFormat
 
 import weakref
 
+class CgParseError(Exception):
+    pass
+
 
 class FileName(object):
     """
@@ -277,7 +280,7 @@ class XdebugCachegrindFsaParser:
                 break
 
             elif state == -1:
-                raise Exception(line_no, line, token)
+                raise CgParseError(line_no, line, token)
 
             elif state == 2:
                 cmd = line[5:-1]
@@ -392,6 +395,6 @@ class XdebugCachegrindFsaParser:
                 break
 
             elif state == -1:
-                raise Exception(line_no, line, token)
+                raise CgParseError(line_no, line, token)
 
         return RawBody(header, body)
