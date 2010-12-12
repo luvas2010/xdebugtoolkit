@@ -1,5 +1,14 @@
 #labels Featured
 == Changelog ==
+=== 0.1.5 ===
+ * cg2dot: issue #15: root node now can just have arbitrary number of subcalls, we dont make any suppositions (that are wrong in some cases) about their number any more. 
+ * cg2dot: issue #12: -i/--ignore option.
+ * cg2dot: optimized filter_inclusive_time a bit, using thresholds inclusively.
+ * cg2dot: better error handling, introducing CgParseError.
+ * added shebang lines.
+ * svn: fixed script eol styles and executable flags.
+ * removed unnecessary error masking.
+
 === 0.1.4 ===
  * added a new xdot-pygoocanvas.py utility which works more rapidly than the original xdot
 
