@@ -30,7 +30,7 @@ if __name__ == '__main__':
         try:
             xdebug_parser = XdebugCachegrindFsaParser(file)
             tree = XdebugCachegrindTreeBuilder(xdebug_parser).get_tree()
-        except CgParseError as e:
+        except CgParseError, e:
             line_no, line, token = e
             sys.stderr.write('Warning: Can\'t parse file \'%s\'\n' % file)
             sys.stderr.write('Line no: %s\n' % line_no)
