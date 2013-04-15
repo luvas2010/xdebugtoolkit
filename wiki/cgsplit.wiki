@@ -13,7 +13,7 @@ Options:
 
 ==Example==
 {{{
-./cgsplit.py fixtures/tth.cg; ./cg2dot.py tth.*.cg | ./xdot.py -
+cgsplit fixtures/tth.cg; cg2dot tth.*.cg | xdot -
 }}}
 
 ==Details==
