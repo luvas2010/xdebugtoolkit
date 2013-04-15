@@ -40,17 +40,17 @@ Options:
 == Examples ==
 render as png:
 {{{
-./cg2dot.py some.cg | path_to_dot/dot -Tpng -osome.png
+cg2dot some.cg | path_to_dot/dot -Tpng -osome.png
 }}}
 
 view in xdot:
 {{{
-./cg2dot.py some.cg | path_to_xdot/xdot.py -
+cg2dot some.cg | xdot -
 }}}
 
 view in xdot-pygocanvas:
 {{{
-./cg2dot.py some.cg | ./xdot-pygoocanvas.py -
+cg2dot some.cg | xdot-pygoocanvas -
 }}}
 
 == Screenshots ==
